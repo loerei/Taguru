@@ -1,10 +1,26 @@
-import { sortCurrentWindowTabs, moveDomainGroupToTabPosition } from './utils/sorter';
+import { sortCurrentWindowTabs, moveDomainGroupToTabPosition, updateDomainOrderCache } from './utils/sorter';
 import { getAutoSortEnabled, getAutoSortOptions } from './utils/storage';
 import { devLog } from './utils/logger';
 import { SortOptions } from './types';
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let isSorting = false;
+
+async function initDomainOrderCache() {
+  if (typeof chrome === 'undefined' || !chrome.tabs) return;
+  try {
+    const tabs = await chrome.tabs.query({ currentWindow: true });
+    if (tabs && tabs.length > 0) {
+      updateDomainOrderCache(tabs);
+      devLog(`Warmed up RAM domainOrderCache on startup with ${tabs.length} tabs.`);
+    }
+  } catch (_e) {
+    // Ignore query error on startup
+  }
+}
+
+// Warm up RAM cache on ServiceWorker execution
+initDomainOrderCache();
 
 async function attemptSort(
   windowId?: number,
@@ -80,55 +96,62 @@ async function triggerAutoSort(windowId?: number, reason = 'unknown') {
   }, 250);
 }
 
-if (typeof chrome !== 'undefined' && chrome.tabs) {
-  chrome.tabs.onCreated.addListener((tab) => {
-    triggerAutoSort(tab.windowId, 'tab-created');
-  });
+if (typeof chrome !== 'undefined') {
+  if (chrome.runtime) {
+    chrome.runtime.onInstalled?.addListener(() => initDomainOrderCache());
+    chrome.runtime.onStartup?.addListener(() => initDomainOrderCache());
+  }
 
-  chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
-    if (changeInfo.url || changeInfo.status === 'complete') {
-      triggerAutoSort(tab.windowId, 'tab-updated');
-    }
-  });
+  if (chrome.tabs) {
+    chrome.tabs.onCreated.addListener((tab) => {
+      triggerAutoSort(tab.windowId, 'tab-created');
+    });
 
-  chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
-    if (!isSorting) {
-      getAutoSortEnabled().then((isEnabled) => {
-        if (!isEnabled) return;
-        getAutoSortOptions().then((opts) => {
-          const mode: 'reFso' | 'mbd' | 'off' =
-            opts.dragMode ?? (opts.autoReFso === false ? 'off' : 'reFso');
-          if (mode === 'off') {
-            devLog('Tab moved, but drag action is OFF. Skipping.');
-            return;
-          }
+    chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
+      if (changeInfo.url || changeInfo.status === 'complete') {
+        triggerAutoSort(tab.windowId, 'tab-updated');
+      }
+    });
 
-          if (debounceTimer) {
-            clearTimeout(debounceTimer);
-          }
-
-          debounceTimer = setTimeout(async () => {
-            try {
-              isSorting = true;
-              if (mode === 'mbd') {
-                devLog(`Triggering Move By Domain (MBD) for tab ${tabId}`);
-                const count = await attemptMoveDomainGroup(moveInfo.windowId, tabId, opts);
-                devLog(`MBD moved ${count} tabs.`);
-              } else {
-                devLog(`Triggering Auto Re-FSO for tab ${tabId}`);
-                const count = await attemptSort(moveInfo.windowId, opts);
-                devLog(`Re-FSO sorted ${count} tabs.`);
-              }
-            } catch (err) {
-              console.error('[Taguru ServiceWorker] Drag action error:', err);
-            } finally {
-              setTimeout(() => {
-                isSorting = false;
-              }, 150);
+    chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
+      if (!isSorting) {
+        getAutoSortEnabled().then((isEnabled) => {
+          if (!isEnabled) return;
+          getAutoSortOptions().then((opts) => {
+            const mode: 'reFso' | 'mbd' | 'off' =
+              opts.dragMode ?? (opts.autoReFso === false ? 'off' : 'reFso');
+            if (mode === 'off') {
+              devLog('Tab moved, but drag action is OFF. Skipping.');
+              return;
             }
-          }, 250);
+
+            if (debounceTimer) {
+              clearTimeout(debounceTimer);
+            }
+
+            debounceTimer = setTimeout(async () => {
+              try {
+                isSorting = true;
+                if (mode === 'mbd') {
+                  devLog(`Triggering Move By Domain (MBD) for tab ${tabId}`);
+                  const count = await attemptMoveDomainGroup(moveInfo.windowId, tabId, opts);
+                  devLog(`MBD moved ${count} tabs.`);
+                } else {
+                  devLog(`Triggering Auto Re-FSO for tab ${tabId}`);
+                  const count = await attemptSort(moveInfo.windowId, opts);
+                  devLog(`Re-FSO sorted ${count} tabs.`);
+                }
+              } catch (err) {
+                console.error('[Taguru ServiceWorker] Drag action error:', err);
+              } finally {
+                setTimeout(() => {
+                  isSorting = false;
+                }, 150);
+              }
+            }, 250);
+          });
         });
-      });
-    }
-  });
+      }
+    });
+  }
 }
