@@ -46,4 +46,4 @@ Taguru contains no third-party SDKs, tracking pixels, advertisement networks, or
 ## 5. Contact & Questions
 
 If you have any questions or feedback regarding this Privacy Policy, please open an issue on our GitHub repository:  
-[https://github.com/sayus/Taguru/issues](https://github.com/sayus/Taguru/issues)
+[https://github.com/loerei/Taguru/issues](https://github.com/loerei/Taguru/issues)

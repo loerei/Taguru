@@ -30,7 +30,7 @@ Taguru automatically organizes, groups, and sorts your browser tabs by domain an
 ### Option B: Load Unpacked (Developer Mode)
 1. Clone or download this repository:
    ```bash
-   git clone https://github.com/sayus/Taguru.git
+   git clone https://github.com/loerei/Taguru.git
    cd Taguru
    npm install
    npm run build
