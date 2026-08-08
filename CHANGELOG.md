@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.3] - Unreleased
 
 ### Added
+- **Opening Tab View Persistence**: Saved and restored the user's active view tab (`Groups`, `Domains`, or `Settings`) in `chrome.storage.local` so opening the Popup or Side Panel automatically opens to the user's last visited view.
 - **Extension Icon Click Behavior Selector**: Added radio options in `General Settings` to choose whether clicking the extension toolbar icon defaults to opening the compact **Popup (Default)** window or opening the persistent **Side Panel (Sidebar)** via `chrome.sidePanel.setPanelBehavior`.
 - **Default Open Keyboard Shortcut (`Ctrl+Shift+E` / `Cmd+Shift+E`)**: Added native `_execute_action` keyboard shortcut in `manifest.json` to open Taguru as a Popup or Side Panel according to user settings.
 - **Real-Time Tab Position Snapshot Logging**: Added real-time tab layout snapshot logs after every sort, drag, MBD placement, and startup operation.

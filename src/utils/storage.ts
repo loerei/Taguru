@@ -323,3 +323,34 @@ export async function setDefaultClickBehavior(behavior: 'popup' | 'sidepanel'): 
     }
   }
 }
+
+const ACTIVE_VIEW_KEY = 'taguru_active_view';
+
+export async function getActiveView(): Promise<'groups' | 'domains' | 'settings'> {
+  if (typeof chrome === 'undefined' || !chrome.storage?.local) {
+    const raw = localStorage.getItem(ACTIVE_VIEW_KEY);
+    return (raw as 'groups' | 'domains' | 'settings') || 'groups';
+  }
+  return new Promise((resolve) => {
+    chrome.storage.local.get([ACTIVE_VIEW_KEY], (res) => {
+      const val = res[ACTIVE_VIEW_KEY];
+      if (val === 'groups' || val === 'domains' || val === 'settings') {
+        resolve(val);
+      } else {
+        resolve('groups');
+      }
+    });
+  });
+}
+
+export async function setActiveViewStorage(view: 'groups' | 'domains' | 'settings'): Promise<void> {
+  if (typeof chrome === 'undefined' || !chrome.storage?.local) {
+    localStorage.setItem(ACTIVE_VIEW_KEY, view);
+    return;
+  }
+  return new Promise((resolve) => {
+    chrome.storage.local.set({ [ACTIVE_VIEW_KEY]: view }, () => {
+      resolve();
+    });
+  });
+}

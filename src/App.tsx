@@ -16,6 +16,8 @@ import {
   setManualSortOptions,
   getAutoSortOptions,
   setAutoSortOptions,
+  getActiveView,
+  setActiveViewStorage,
   DEFAULT_SORT_OPTIONS
 } from './utils/storage';
 import {
@@ -54,12 +56,18 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
   }, []);
 
   useEffect(() => {
+    getActiveView().then(setActiveView);
     refreshGroups();
     refreshDomains();
     getAutoSortEnabled().then(setIsAutoSort);
     getManualSortOptions().then(setManualSortOptionsState);
     getAutoSortOptions().then(setAutoSortOptionsState);
   }, [refreshGroups, refreshDomains]);
+
+  const handleViewChange = (view: 'groups' | 'domains' | 'settings') => {
+    setActiveView(view);
+    setActiveViewStorage(view);
+  };
 
   useEffect(() => {
     if (typeof chrome === 'undefined' || !chrome.tabs) return;
@@ -181,7 +189,7 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
     <div className="app-container">
       <Header
         activeView={activeView}
-        onViewChange={setActiveView}
+        onViewChange={handleViewChange}
         isAutoSort={isAutoSort}
         onToggleAutoSort={handleToggleAutoSort}
         onSort={handleSortTabs}
