@@ -65,4 +65,4 @@ Taguru respects your privacy. All processing happens 100% locally on your machin
 
 ## 📄 License
 
-[MIT License](LICENSE) © 2026 Taguru
+[MIT License](LICENSE) © 2026 loerei
