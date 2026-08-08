@@ -1,4 +1,5 @@
 import { SortOptions } from '../types';
+import { devLog } from './logger';
 
 export const DEFAULT_SORT_OPTIONS: SortOptions = {
   groupByDomain: true,
@@ -274,6 +275,7 @@ export function updateDomainOrderCache(tabs: { id?: number; pendingUrl?: string;
   }
   for (const [domain, tabIds] of currentGroups) {
     domainOrderCache.set(domain, tabIds);
+    devLog(`[RAM Cache SET] ${domain} -> tabIds: [${tabIds.join(', ')}]`);
   }
 }
 
@@ -398,6 +400,7 @@ export async function moveDomainGroupToTabPosition(
   // Case B: Inter-Domain Drag across other domains -> Consolidate into a cohesive block at target position
   const cachedTabIds = domainOrderCache.get(movedDomain);
   if (cachedTabIds && cachedTabIds.length > 0) {
+    devLog(`[RAM Cache GET] ${movedDomain} -> cachedTabIds: [${cachedTabIds.join(', ')}]`);
     const orderMap = new Map<number, number>();
     cachedTabIds.forEach((id: number, idx: number) => orderMap.set(id, idx));
     domainTabs.sort((a, b) => {
@@ -405,8 +408,11 @@ export async function moveDomainGroupToTabPosition(
       const indexB = b.id !== undefined && orderMap.has(b.id) ? orderMap.get(b.id)! : 999999;
       return indexA - indexB;
     });
-  } else if (opts.sortByPathSegments || opts.sortByQueryAndHash) {
-    domainTabs.sort((a, b) => compareURLs(getTabUrl(a), getTabUrl(b), opts));
+  } else {
+    devLog(`[RAM Cache MISS] ${movedDomain} -> No cached order found in RAM.`);
+    if (opts.sortByPathSegments || opts.sortByQueryAndHash) {
+      domainTabs.sort((a, b) => compareURLs(getTabUrl(a), getTabUrl(b), opts));
+    }
   }
 
   const movedIndexInTarget = targetTabs.findIndex((t) => t.id === movedTabId);
