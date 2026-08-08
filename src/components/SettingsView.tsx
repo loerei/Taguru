@@ -103,44 +103,50 @@ const SortOptionsCard: React.FC<SortOptionsCardProps> = ({
                 <div className={`sub-radio-group ${isSubOptionsDisabled ? 'is-unavailable' : ''}`}>
                   <span className="sub-radio-title">WHEN YOU DRAG A TAB</span>
                   <div className="sub-radio-options">
-                    <label className="sub-radio-label" htmlFor={`${idPrefix}-dragMode-reFso`}>
-                      <input
-                        id={`${idPrefix}-dragMode-reFso`}
-                        type="radio"
-                        name={`${idPrefix}-dragMode`}
-                        checked={(options.dragMode ?? 'reFso') === 'reFso'}
-                        disabled={isSubOptionsDisabled}
-                        onChange={() => handleDragModeChange('reFso')}
-                      />
-                      <span className="sub-radio-text">Re-Group Domain (Default)</span>
-                    </label>
-                    <span className="sub-radio-subtext">Pull misplaced tab back to its domain</span>
+                    <div className="sub-radio-item">
+                      <label className="sub-radio-label" htmlFor={`${idPrefix}-dragMode-reFso`}>
+                        <input
+                          id={`${idPrefix}-dragMode-reFso`}
+                          type="radio"
+                          name={`${idPrefix}-dragMode`}
+                          checked={(options.dragMode ?? 'reFso') === 'reFso'}
+                          disabled={isSubOptionsDisabled}
+                          onChange={() => handleDragModeChange('reFso')}
+                        />
+                        <span className="sub-radio-text">Re-Group Domain (Default)</span>
+                      </label>
+                      <span className="sub-radio-subtext">Pull misplaced tab back to its domain</span>
+                    </div>
 
-                    <label className="sub-radio-label" htmlFor={`${idPrefix}-dragMode-mbd`}>
-                      <input
-                        id={`${idPrefix}-dragMode-mbd`}
-                        type="radio"
-                        name={`${idPrefix}-dragMode`}
-                        checked={options.dragMode === 'mbd'}
-                        disabled={isSubOptionsDisabled}
-                        onChange={() => handleDragModeChange('mbd')}
-                      />
-                      <span className="sub-radio-text">Move Entire Domain (MBD)</span>
-                    </label>
-                    <span className="sub-radio-subtext">Move all tabs from that domain to the new position</span>
+                    <div className="sub-radio-item">
+                      <label className="sub-radio-label" htmlFor={`${idPrefix}-dragMode-mbd`}>
+                        <input
+                          id={`${idPrefix}-dragMode-mbd`}
+                          type="radio"
+                          name={`${idPrefix}-dragMode`}
+                          checked={options.dragMode === 'mbd'}
+                          disabled={isSubOptionsDisabled}
+                          onChange={() => handleDragModeChange('mbd')}
+                        />
+                        <span className="sub-radio-text">Move Entire Domain (MBD)</span>
+                      </label>
+                      <span className="sub-radio-subtext">Move all tabs from that domain to the new position</span>
+                    </div>
 
-                    <label className="sub-radio-label" htmlFor={`${idPrefix}-dragMode-off`}>
-                      <input
-                        id={`${idPrefix}-dragMode-off`}
-                        type="radio"
-                        name={`${idPrefix}-dragMode`}
-                        checked={options.dragMode === 'off'}
-                        disabled={isSubOptionsDisabled}
-                        onChange={() => handleDragModeChange('off')}
-                      />
-                      <span className="sub-radio-text">Disabled</span>
-                    </label>
-                    <span className="sub-radio-subtext">Don't auto-sort when dragging tabs</span>
+                    <div className="sub-radio-item">
+                      <label className="sub-radio-label" htmlFor={`${idPrefix}-dragMode-off`}>
+                        <input
+                          id={`${idPrefix}-dragMode-off`}
+                          type="radio"
+                          name={`${idPrefix}-dragMode`}
+                          checked={options.dragMode === 'off'}
+                          disabled={isSubOptionsDisabled}
+                          onChange={() => handleDragModeChange('off')}
+                        />
+                        <span className="sub-radio-text">Disabled</span>
+                      </label>
+                      <span className="sub-radio-subtext">Don't auto-sort when dragging tabs</span>
+                    </div>
                   </div>
                 </div>
               )}
