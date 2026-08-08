@@ -37,8 +37,15 @@ Taguru automatically organizes, groups, and sorts your browser tabs by domain an
 1. Visit the **Chrome Web Store** page *(Link coming soon)*.
 2. Click **Add to Chrome**.
 
-### Option B: Load Unpacked (Developer Mode)
-1. Clone or download this repository:
+### Option B: Download Pre-built Release (No Node.js Required)
+1. Download `taguru-release.zip` from [GitHub Releases](https://github.com/loerei/Taguru/releases).
+2. Unzip `taguru-release.zip` to a folder.
+3. Open `chrome://extensions` in Chrome, Brave, or Edge.
+4. Enable **Developer mode** (top-right toggle).
+5. Click **Load unpacked** and select the unzipped folder.
+
+### Option C: Build from Source (For Developers)
+1. Clone this repository:
    ```bash
    git clone https://github.com/loerei/Taguru.git
    cd Taguru
