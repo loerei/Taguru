@@ -74,6 +74,21 @@ Level B: In-Domain
 
 ---
 
+## 🛠️ Developer Options & Diagnostic Logging
+
+Taguru includes a built-in Developer Options panel for diagnostic logging, tab position snapshots, and RAM cache inspection.
+
+### How to Access Developer Options:
+1. Load Taguru in **Development Mode** (`npm run dev`) or build from source (`npm run build`). *(Note: Developer Options card is automatically hidden in production release bundles `npm run build:release`)*.
+2. Open Taguru in your browser (Side Panel or Extension Popup).
+3. Click the **Settings ⚙️** icon in the top right.
+4. Scroll down to the bottom to find the **Developer Options** card.
+5. Check **Enable Debug Logs**:
+   - Verbose sorting logs, RAM cache events (`[RAM Cache SET/GET/MISS]`), and real-time layout snapshots (`[Tab Positions Snapshot]`) will print directly to the Console (`F12`).
+   - Use the **Copy Logs**, **Export Logs (.txt)**, and **Clear Logs** buttons to save or manage log buffers.
+
+---
+
 ## 🔒 Privacy
 
 Taguru respects your privacy. All processing happens 100% locally on your machine. Read our complete [Privacy Policy](PRIVACY.md).
