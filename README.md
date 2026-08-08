@@ -1,12 +1,22 @@
-# Taguru 🏷️
+<p align="center">
+  <img src="public/logo.svg" width="120" height="120" alt="Taguru Logo" />
+</p>
 
-> **Automatic Tab Grouping & Domain Sorter for Chromium**
+<h1 align="center">Taguru</h1>
+
+<p align="center">
+  <b>Automatic Tab Grouping & Domain Sorter for Chromium</b>
+</p>
+
+<p align="center">
+  <a href="https://github.com/loerei/Taguru"><img src="https://img.shields.io/badge/Manifest-V3-blue?style=flat-square" alt="Manifest V3" /></a>
+  <a href="PRIVACY.md"><img src="https://img.shields.io/badge/Privacy-100%25_Offline-emerald?style=flat-square" alt="Privacy First" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-purple?style=flat-square" alt="License" /></a>
+</p>
+
+---
 
 Taguru automatically organizes, groups, and sorts your browser tabs by domain and URL structure. Built for power users who want a clean, organized tab bar.
-
-![Manifest V3](https://img.shields.io/badge/Manifest-V3-blue?style=flat-square)
-![Privacy First](https://img.shields.io/badge/Privacy-100%25_Offline-emerald?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-purple?style=flat-square)
 
 ---
 
