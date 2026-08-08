@@ -458,9 +458,28 @@ export async function moveDomainGroupToTabPosition(
       (t) => parseURL(getTabUrl(t)).domain === targetDomainC
     );
 
-    // Check if G and C were adjacent in targetTabs before move
+    // Determine pre-drag relative domain positions from RAM Cache
+    const movedCachedTabIds = domainOrderCache.get(movedDomain);
+    const targetCachedTabIds = domainOrderCache.get(targetDomainC);
+
+    let wasGAfterCInCache = false;
+    let hasCache = false;
+
+    if (movedCachedTabIds && movedCachedTabIds.length > 0 && targetCachedTabIds && targetCachedTabIds.length > 0) {
+      const cachedMovedTabId = movedCachedTabIds[0];
+      const cachedTargetTabId = targetCachedTabIds[0];
+
+      const gPreIndex = tabs.findIndex((t) => t.id === cachedMovedTabId);
+      const cPreIndex = tabs.findIndex((t) => t.id === cachedTargetTabId);
+
+      if (gPreIndex !== -1 && cPreIndex !== -1) {
+        wasGAfterCInCache = gPreIndex > cPreIndex;
+        hasCache = true;
+      }
+    }
+
     const gFirstIndexInTarget = firstIndex;
-    const isGAfterC = gFirstIndexInTarget > cFirstIndexInTarget;
+    const isGAfterC = hasCache ? wasGAfterCInCache : gFirstIndexInTarget > cFirstIndexInTarget;
 
     let otherDomainsBetweenCount = 0;
     const rangeStart = Math.min(gFirstIndexInTarget, cFirstIndexInTarget);
@@ -474,10 +493,10 @@ export async function moveDomainGroupToTabPosition(
     const isAdjacent = otherDomainsBetweenCount === 0;
 
     if (isAdjacent && isGAfterC) {
-      // Special Adjacency Rule: G was adjacent after C and user dragged G UP into C -> Swap G before C
+      // G was adjacent AFTER C before the drag, user dragged G UP into C -> Swap G BEFORE C
       nonDomainCountBefore = cFirstIndexInOther;
     } else if (isAdjacent && !isGAfterC) {
-      // Special Adjacency Rule: G was adjacent before C and user dragged G DOWN into C -> Swap G after C
+      // G was adjacent BEFORE C before the drag, user dragged G DOWN into C -> Swap G AFTER C
       nonDomainCountBefore = cFirstIndexInOther + cTabs.length;
     } else {
       // General Threshold Rule based on middle tab of domain C

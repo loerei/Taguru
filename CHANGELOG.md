@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Real-Time Tab Position Snapshot Logging**: Added real-time tab layout snapshot logs after every sort, drag, MBD placement, and startup operation.
 
 ### Fixed
+- **MBD Pre-Drag RAM Cache Direction Check**: Fixed single-tab domain drag bounce bug where dragging domain `A[1]` down after `B[1]` was miscalculated as an upward drag due to post-drag DOM tab state, causing `A[1]` to bounce back to the top. Implemented pre-drag index lookup in `domainOrderCache` to accurately calculate drag direction.
 - **MBD Single-Tab Domain Bypass & Split Domain Prevention**:
   - Fixed single-tab domain bypass in `moveDomainGroupToTabPosition` so 1-tab domains execute inter-domain relocation when dropped into/across another domain.
   - Refined `isContiguous` split domain detection to check if tabs before and after the moved domain belong to the same non-moved domain, preventing target domains from ever being split.
