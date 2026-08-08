@@ -7,7 +7,7 @@ interface SortOptionsCardProps {
   title: string;
   description: string;
   options: SortOptions;
-  onChange: (updated: SortOptions) => void;
+  onChange: (options: SortOptions) => void;
   isAutoSortCard?: boolean;
 }
 
@@ -42,31 +42,10 @@ const SortOptionsCard: React.FC<SortOptionsCardProps> = ({
   };
 
   const isSubOptionsDisabled = !options.groupByDomain;
-  const isReleaseMode = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'release';
-  const [logStatus, setLogStatus] = useState<string | null>(null);
-
-  const handleClearLogs = async () => {
-    await clearDebugLogs();
-    setLogStatus('Logs cleared');
-    setTimeout(() => setLogStatus(null), 3000);
-  };
-
-  const handleExportLogs = async () => {
-    await exportDebugLogsAsFile();
-    setLogStatus('Logs exported');
-    setTimeout(() => setLogStatus(null), 3000);
-  };
-
-  const handleCopyLogs = async () => {
-    const success = await copyDebugLogsToClipboard();
-    setLogStatus(success ? 'Logs copied to clipboard' : 'Failed to copy logs');
-    setTimeout(() => setLogStatus(null), 3000);
-  };
-  const currentDragMode = options.dragMode ?? (options.autoReFso === false ? 'off' : 'reFso');
 
   return (
     <div className="settings-card">
-      <div className="settings-card-header">
+      <div className="settings-header">
         <h3 className="settings-title">{title}</h3>
         <p className="settings-desc">{description}</p>
       </div>
@@ -119,55 +98,49 @@ const SortOptionsCard: React.FC<SortOptionsCardProps> = ({
               </label>
               <span className="radio-subtext">Keep domains in the order they first appeared</span>
 
-              {/* Sub-selector ONLY for Auto Sort Settings under FSO */}
+              {/* Sub-option: WHEN YOU DRAG A TAB (Only in Auto Sort card & when FSO is selected) */}
               {isAutoSortCard && !options.sortByCharRank && (
-                <div className={`radio-group-container ${isSubOptionsDisabled ? 'is-unavailable' : ''}`} style={{ marginTop: '8px', marginLeft: '14px' }}>
-                  <span className="radio-group-title">When You Drag a Tab</span>
-                  <div className="radio-options">
-                    <div className={`radio-option ${currentDragMode !== 'reFso' ? 'is-unselected' : ''} ${isSubOptionsDisabled ? 'is-unavailable' : ''}`}>
-                      <label className="radio-label" htmlFor={`${idPrefix}-drag-refso`}>
-                        <input
-                          id={`${idPrefix}-drag-refso`}
-                          type="radio"
-                          name={`${idPrefix}-dragAction`}
-                          checked={currentDragMode === 'reFso'}
-                          disabled={isSubOptionsDisabled}
-                          onChange={() => handleDragModeChange('reFso')}
-                        />
-                        <span className="radio-text">Re-Group Domain (Default)</span>
-                      </label>
-                      <span className="radio-subtext">Pull misplaced tab back to its domain</span>
-                    </div>
+                <div className={`sub-radio-group ${isSubOptionsDisabled ? 'is-unavailable' : ''}`}>
+                  <span className="sub-radio-title">WHEN YOU DRAG A TAB</span>
+                  <div className="sub-radio-options">
+                    <label className="sub-radio-label" htmlFor={`${idPrefix}-dragMode-reFso`}>
+                      <input
+                        id={`${idPrefix}-dragMode-reFso`}
+                        type="radio"
+                        name={`${idPrefix}-dragMode`}
+                        checked={(options.dragMode ?? 'reFso') === 'reFso'}
+                        disabled={isSubOptionsDisabled}
+                        onChange={() => handleDragModeChange('reFso')}
+                      />
+                      <span className="sub-radio-text">Re-Group Domain (Default)</span>
+                    </label>
+                    <span className="sub-radio-subtext">Pull misplaced tab back to its domain</span>
 
-                    <div className={`radio-option ${currentDragMode !== 'mbd' ? 'is-unselected' : ''} ${isSubOptionsDisabled ? 'is-unavailable' : ''}`}>
-                      <label className="radio-label" htmlFor={`${idPrefix}-drag-mbd`}>
-                        <input
-                          id={`${idPrefix}-drag-mbd`}
-                          type="radio"
-                          name={`${idPrefix}-dragAction`}
-                          checked={currentDragMode === 'mbd'}
-                          disabled={isSubOptionsDisabled}
-                          onChange={() => handleDragModeChange('mbd')}
-                        />
-                        <span className="radio-text">Move Entire Domain (MBD)</span>
-                      </label>
-                      <span className="radio-subtext">Move all tabs from that domain to the new position</span>
-                    </div>
+                    <label className="sub-radio-label" htmlFor={`${idPrefix}-dragMode-mbd`}>
+                      <input
+                        id={`${idPrefix}-dragMode-mbd`}
+                        type="radio"
+                        name={`${idPrefix}-dragMode`}
+                        checked={options.dragMode === 'mbd'}
+                        disabled={isSubOptionsDisabled}
+                        onChange={() => handleDragModeChange('mbd')}
+                      />
+                      <span className="sub-radio-text">Move Entire Domain (MBD)</span>
+                    </label>
+                    <span className="sub-radio-subtext">Move all tabs from that domain to the new position</span>
 
-                    <div className={`radio-option ${currentDragMode !== 'off' ? 'is-unselected' : ''} ${isSubOptionsDisabled ? 'is-unavailable' : ''}`}>
-                      <label className="radio-label" htmlFor={`${idPrefix}-drag-off`}>
-                        <input
-                          id={`${idPrefix}-drag-off`}
-                          type="radio"
-                          name={`${idPrefix}-dragAction`}
-                          checked={currentDragMode === 'off'}
-                          disabled={isSubOptionsDisabled}
-                          onChange={() => handleDragModeChange('off')}
-                        />
-                        <span className="radio-text">Disabled</span>
-                      </label>
-                      <span className="radio-subtext">Don't auto-sort when dragging tabs</span>
-                    </div>
+                    <label className="sub-radio-label" htmlFor={`${idPrefix}-dragMode-off`}>
+                      <input
+                        id={`${idPrefix}-dragMode-off`}
+                        type="radio"
+                        name={`${idPrefix}-dragMode`}
+                        checked={options.dragMode === 'off'}
+                        disabled={isSubOptionsDisabled}
+                        onChange={() => handleDragModeChange('off')}
+                      />
+                      <span className="sub-radio-text">Disabled</span>
+                    </label>
+                    <span className="sub-radio-subtext">Don't auto-sort when dragging tabs</span>
                   </div>
                 </div>
               )}
@@ -192,10 +165,8 @@ const SortOptionsCard: React.FC<SortOptionsCardProps> = ({
       </div>
 
       {/* Level B: In-Domain */}
-      <div className={`settings-level-group ${isSubOptionsDisabled ? 'is-unavailable level-disabled' : ''}`}>
-        <h4 className="level-group-title">
-          B. In-Domain {isSubOptionsDisabled && <span className="disabled-badge">(Requires Grouping by Domain enabled)</span>}
-        </h4>
+      <div className="settings-level-group">
+        <h4 className="level-group-title">B. In-Domain</h4>
         <div className={`toggle-row ${!options.sortByPathSegments ? 'is-unselected' : ''} ${isSubOptionsDisabled ? 'is-unavailable' : ''}`}>
           <label className="toggle-label" htmlFor={`${idPrefix}-sortByPathSegments`}>
             <input
@@ -224,43 +195,6 @@ const SortOptionsCard: React.FC<SortOptionsCardProps> = ({
           <span className="toggle-subtext">Sort by URL parameters (?key=val, #anchor)</span>
         </div>
       </div>
-
-      {/* Dev Options */}
-      {!isReleaseMode && (
-        <div className="settings-level-group" style={{ marginTop: '12px', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
-          <h4 className="level-group-title">Developer Options</h4>
-          <div className={`toggle-row ${!options.debugLogging ? 'is-unselected' : ''}`}>
-            <label className="toggle-label" htmlFor={`${idPrefix}-debugLogging`}>
-              <input
-                id={`${idPrefix}-debugLogging`}
-                type="checkbox"
-                checked={!!options.debugLogging}
-                onChange={() => handleToggle('debugLogging')}
-              />
-              <span className="toggle-text">Enable Debug Logs</span>
-            </label>
-            <span className="toggle-subtext">Print verbose sorting and drag event logs to Developer Tools console</span>
-            {options.debugLogging && (
-              <div className="log-actions-container" style={{ marginTop: '10px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <button type="button" className="btn btn-sm" onClick={handleExportLogs}>
-                  Export Logs (.txt)
-                </button>
-                <button type="button" className="btn btn-sm" onClick={handleCopyLogs}>
-                  Copy Logs
-                </button>
-                <button type="button" className="btn btn-sm btn-danger" onClick={handleClearLogs}>
-                  Clear Logs
-                </button>
-                {logStatus && (
-                  <span className="toggle-subtext" style={{ color: 'var(--accent-color)', marginLeft: '4px' }}>
-                    {logStatus}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -278,6 +212,34 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onManualOptionsChange,
   onAutoOptionsChange
 }) => {
+  const isReleaseMode = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'release';
+  const [logStatus, setLogStatus] = useState<string | null>(null);
+
+  const handleToggleDebugLogging = () => {
+    onAutoOptionsChange({
+      ...autoSortOptions,
+      debugLogging: !autoSortOptions.debugLogging
+    });
+  };
+
+  const handleClearLogs = async () => {
+    await clearDebugLogs();
+    setLogStatus('Logs cleared');
+    setTimeout(() => setLogStatus(null), 3000);
+  };
+
+  const handleExportLogs = async () => {
+    await exportDebugLogsAsFile();
+    setLogStatus('Logs exported');
+    setTimeout(() => setLogStatus(null), 3000);
+  };
+
+  const handleCopyLogs = async () => {
+    const success = await copyDebugLogsToClipboard();
+    setLogStatus(success ? 'Logs copied to clipboard' : 'Failed to copy logs');
+    setTimeout(() => setLogStatus(null), 3000);
+  };
+
   return (
     <div className="settings-container">
       <SortOptionsCard
@@ -297,6 +259,49 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         onChange={onAutoOptionsChange}
         isAutoSortCard={true}
       />
+
+      {/* Developer Options Section (Hidden only in release build mode) */}
+      {!isReleaseMode && (
+        <div className="settings-card dev-options-card">
+          <div className="settings-header">
+            <h3 className="settings-title">Developer Options</h3>
+            <p className="settings-desc">Diagnostic logging and dev tools</p>
+          </div>
+          <div className="settings-level-group">
+            <div className={`toggle-row ${!autoSortOptions.debugLogging ? 'is-unselected' : ''}`}>
+              <label className="toggle-label" htmlFor="dev-debugLogging">
+                <input
+                  id="dev-debugLogging"
+                  type="checkbox"
+                  checked={!!autoSortOptions.debugLogging}
+                  onChange={handleToggleDebugLogging}
+                />
+                <span className="toggle-text">Enable Debug Logs</span>
+              </label>
+              <span className="toggle-subtext">Print verbose sorting and drag event logs to Developer Tools console</span>
+
+              {autoSortOptions.debugLogging && (
+                <div className="log-actions-container" style={{ marginTop: '10px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <button type="button" className="btn btn-sm" onClick={handleExportLogs}>
+                    Export Logs (.txt)
+                  </button>
+                  <button type="button" className="btn btn-sm" onClick={handleCopyLogs}>
+                    Copy Logs
+                  </button>
+                  <button type="button" className="btn btn-sm btn-danger" onClick={handleClearLogs}>
+                    Clear Logs
+                  </button>
+                  {logStatus && (
+                    <span className="toggle-subtext" style={{ color: 'var(--accent-color)', marginLeft: '4px' }}>
+                      {logStatus}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
