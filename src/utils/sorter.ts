@@ -1,5 +1,5 @@
 import { SortOptions } from '../types';
-import { devLog } from './logger';
+import { devLog, logTabPositionsSnapshot } from './logger';
 
 export const DEFAULT_SORT_OPTIONS: SortOptions = {
   groupByDomain: true,
@@ -306,6 +306,9 @@ export async function sortCurrentWindowTabs(
     await chrome.tabs.move(tabIds, { index: 0 });
   }
 
+  updateDomainOrderCache(sortedTabs);
+  await logTabPositionsSnapshot('Manual Sort Button');
+
   return sortedTabs.length;
 }
 
@@ -508,5 +511,7 @@ export async function moveDomainGroupToTabPosition(
     await chrome.tabs.move(tabIds, { index: 0 });
   }
 
+  updateDomainOrderCache(fullSortedTabs);
+  await logTabPositionsSnapshot('Inter-Domain Drag');
   return tabIds.length;
 }

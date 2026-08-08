@@ -1,4 +1,5 @@
 import { parseURL, updateDomainOrderCache } from './sorter';
+import { logTabPositionsSnapshot } from './logger';
 import { SavedTab, SavedGroup } from '../types';
 import { saveGroups, getGroups } from './storage';
 
@@ -168,4 +169,5 @@ export async function reorderDomainBlock(
 
   await chrome.tabs.move(tabIdsToMove, { index: targetIndex });
   updateDomainOrderCache(draggedDomain.tabs as any);
+  await logTabPositionsSnapshot('UI Domain Card Drag');
 }

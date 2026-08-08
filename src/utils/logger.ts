@@ -51,6 +51,69 @@ export async function devLog(message: string, ...args: any[]): Promise<void> {
   }
 }
 
+export async function logTabPositionsSnapshot(actionTag: string): Promise<void> {
+  if (typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'release') {
+    return;
+  }
+  if (typeof chrome === 'undefined' || !chrome.tabs) {
+    return;
+  }
+
+  try {
+    const tabs = await chrome.tabs.query({ currentWindow: true });
+    if (!tabs || tabs.length === 0) return;
+
+    const parseDomain = (rawUrl: string): string => {
+      try {
+        const urlObj = new URL(rawUrl);
+        let domain = urlObj.hostname;
+        if (domain.startsWith('www.')) domain = domain.substring(4);
+        return domain || 'other';
+      } catch {
+        return 'other';
+      }
+    };
+
+    const groups: { domain: string; range: string; tabIds: number[] }[] = [];
+    let currentDomain: string | null = null;
+    let currentTabIds: number[] = [];
+    let startIdx = 0;
+
+    tabs.forEach((tab, idx) => {
+      const url = tab.pendingUrl || tab.url || '';
+      const domain = parseDomain(url);
+
+      if (currentDomain === null) {
+        currentDomain = domain;
+        if (tab.id !== undefined) currentTabIds.push(tab.id);
+        startIdx = idx;
+      } else if (domain === currentDomain) {
+        if (tab.id !== undefined) currentTabIds.push(tab.id);
+      } else {
+        const endIdx = idx - 1;
+        const rangeStr = startIdx === endIdx ? `[${startIdx}]` : `[${startIdx}..${endIdx}]`;
+        groups.push({ domain: currentDomain, range: rangeStr, tabIds: [...currentTabIds] });
+
+        currentDomain = domain;
+        currentTabIds = tab.id !== undefined ? [tab.id] : [];
+        startIdx = idx;
+      }
+    });
+
+    if (currentDomain !== null) {
+      const endIdx = tabs.length - 1;
+      const rangeStr = startIdx === endIdx ? `[${startIdx}]` : `[${startIdx}..${endIdx}]`;
+      groups.push({ domain: currentDomain, range: rangeStr, tabIds: [...currentTabIds] });
+    }
+
+    const summaryStr = groups.map((g) => `${g.range} ${g.domain} (ids: [${g.tabIds.join(', ')}])`).join(' | ');
+    await devLog(`[Tab Positions Snapshot] after [${actionTag}] -> Total: ${tabs.length} tabs`);
+    await devLog(`  -> ${summaryStr}`);
+  } catch (_e) {
+    // Ignore logging errors
+  }
+}
+
 export async function getDebugLogs(): Promise<string[]> {
   if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
     return [];

@@ -1,6 +1,6 @@
 import { sortCurrentWindowTabs, moveDomainGroupToTabPosition, updateDomainOrderCache } from './utils/sorter';
 import { getAutoSortEnabled, getAutoSortOptions } from './utils/storage';
-import { devLog } from './utils/logger';
+import { devLog, logTabPositionsSnapshot } from './utils/logger';
 import { SortOptions } from './types';
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -13,6 +13,7 @@ async function initDomainOrderCache() {
     if (tabs && tabs.length > 0) {
       updateDomainOrderCache(tabs);
       devLog(`Warmed up RAM domainOrderCache on startup with ${tabs.length} tabs.`);
+      await logTabPositionsSnapshot('Startup Warm-Up');
     }
   } catch (_e) {
     // Ignore query error on startup
