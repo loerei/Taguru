@@ -34,7 +34,7 @@ Taguru automatically organizes, groups, and sorts your browser tabs by domain an
 ## 🚀 Quick Start
 
 ### Option A: Install from Chrome Web Store (Recommended)
-1. Visit the **Chrome Web Store** page *(Link coming soon)*.
+1. Visit the **Chrome Web Store** page *(Link coming soon.. or not really cuz I'm broke)*.
 2. Click **Add to Chrome**.
 
 ### Option B: Download Pre-built Release (No Node.js Required)
