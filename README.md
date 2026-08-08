@@ -80,6 +80,6 @@ Taguru respects your privacy. All processing happens 100% locally on your machin
 
 ---
 
-## 📄 License
+## 📄 License & Changelog
 
-[MIT License](LICENSE) © 2026 loerei
+[MIT License](LICENSE) • [Changelog](CHANGELOG.md) © 2026 loerei
