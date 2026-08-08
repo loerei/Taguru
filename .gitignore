@@ -1,6 +1,8 @@
 # Agent skills & local workspace configs
 .claude/
 .agents/
+# Release archives
+*.zip
 agent/
 skills-lock.json
 # Dependencies
