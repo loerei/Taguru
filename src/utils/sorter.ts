@@ -458,24 +458,17 @@ export async function moveDomainGroupToTabPosition(
       (t) => parseURL(getTabUrl(t)).domain === targetDomainC
     );
 
-    // Determine pre-drag relative domain positions from RAM Cache
-    const movedCachedTabIds = domainOrderCache.get(movedDomain);
-    const targetCachedTabIds = domainOrderCache.get(targetDomainC);
+    // Determine pre-drag relative domain positions from RAM Cache key insertion order
+    const cacheKeys = Array.from(domainOrderCache.keys());
+    const gKeyIndex = cacheKeys.indexOf(movedDomain);
+    const cKeyIndex = cacheKeys.indexOf(targetDomainC);
 
     let wasGAfterCInCache = false;
     let hasCache = false;
 
-    if (movedCachedTabIds && movedCachedTabIds.length > 0 && targetCachedTabIds && targetCachedTabIds.length > 0) {
-      const cachedMovedTabId = movedCachedTabIds[0];
-      const cachedTargetTabId = targetCachedTabIds[0];
-
-      const gPreIndex = tabs.findIndex((t) => t.id === cachedMovedTabId);
-      const cPreIndex = tabs.findIndex((t) => t.id === cachedTargetTabId);
-
-      if (gPreIndex !== -1 && cPreIndex !== -1) {
-        wasGAfterCInCache = gPreIndex > cPreIndex;
-        hasCache = true;
-      }
+    if (gKeyIndex !== -1 && cKeyIndex !== -1) {
+      wasGAfterCInCache = gKeyIndex > cKeyIndex;
+      hasCache = true;
     }
 
     const gFirstIndexInTarget = firstIndex;
@@ -511,6 +504,8 @@ export async function moveDomainGroupToTabPosition(
         nonDomainCountBefore = cFirstIndexInOther;
       }
     }
+
+    devLog(`[MBD Placement Decision] moved='${movedDomain}' -> targetC='${targetDomainC}', preDragWasAfter=${isGAfterC} (hasCache=${hasCache}), isAdjacent=${isAdjacent}, placedAtOtherIndex=${nonDomainCountBefore}`);
   } else {
     for (let i = 0; i < movedIndexInTarget; i += 1) {
       if (parseURL(getTabUrl(targetTabs[i])).domain !== movedDomain) {
