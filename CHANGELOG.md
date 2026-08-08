@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Domain Favicon Rendering**: Displayed 18x18 px domain favicon icons on domain cards with automatic SVG globe fallback for missing or broken favicons.
 - **Horizontal Compact Domain Card Layout**: Aligned tab counts horizontally on the same line as domain names, reducing domain item vertical card height.
+- **Real-Time FSO Domain List Synchronization**: Added Chromium tab event listeners (`onMoved`, `onCreated`, `onRemoved`, `onUpdated`) to sync the `Domains` view order in real-time with actual browser tab bar positions when Auto Sort + FSO is active.
+- **Move Entire Domain (MBD) as Default Action**: Set `Move Entire Domain (MBD)` as the default drag option in `DEFAULT_SORT_OPTIONS` and positioned it at the top of the drag action radio group in Settings.
 - **General Settings Section**: Isolated general mouse shortcuts like `Middle-Click Domain Close` into a dedicated standalone settings card.
 
 ### Fixed
