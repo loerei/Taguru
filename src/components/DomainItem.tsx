@@ -5,22 +5,38 @@ interface DomainItemProps {
   item: DomainGroup;
   isBatchMode: boolean;
   isSelected: boolean;
+  isAutoSortFSO?: boolean;
   closeDomainOnMiddleClick?: boolean;
   onToggleSelect: (domain: string) => void;
   onMoveToNewWindow: (domain: string) => void;
   onSaveAsGroup: (domain: string) => void;
   onDelete: (domain: string) => void;
+  onDragStart?: (e: React.DragEvent, domain: string) => void;
+  onDragOver?: (e: React.DragEvent, domain: string) => void;
+  onDragLeave?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent, domain: string) => void;
+  onDragEnd?: (e: React.DragEvent) => void;
+  dragOverPosition?: 'before' | 'after' | null;
+  isDraggingThis?: boolean;
 }
 
 export const DomainItem: React.FC<DomainItemProps> = ({
   item,
   isBatchMode,
   isSelected,
+  isAutoSortFSO = false,
   closeDomainOnMiddleClick = false,
   onToggleSelect,
   onMoveToNewWindow,
   onSaveAsGroup,
-  onDelete
+  onDelete,
+  onDragStart,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  onDragEnd,
+  dragOverPosition = null,
+  isDraggingThis = false
 }) => {
   const [imgError, setImgError] = useState<boolean>(false);
   const [isExiting, setIsExiting] = useState<boolean>(false);
@@ -51,9 +67,19 @@ export const DomainItem: React.FC<DomainItemProps> = ({
 
   return (
     <div
-      className={`group-item domain-item ${isSelected ? 'selected' : ''} ${isExiting ? 'is-exiting' : ''}`}
+      className={`group-item domain-item ${isSelected ? 'selected' : ''} ${isExiting ? 'is-exiting' : ''} ${
+        isDraggingThis ? 'is-dragging' : ''
+      } ${dragOverPosition === 'before' ? 'drag-over-top' : ''} ${
+        dragOverPosition === 'after' ? 'drag-over-bottom' : ''
+      }`}
+      draggable={isAutoSortFSO && !isBatchMode}
       onMouseDown={handleMouseDown}
       onAuxClick={handleAuxClick}
+      onDragStart={(e) => onDragStart?.(e, item.domain)}
+      onDragOver={(e) => onDragOver?.(e, item.domain)}
+      onDragLeave={onDragLeave}
+      onDrop={(e) => onDrop?.(e, item.domain)}
+      onDragEnd={onDragEnd}
     >
       <div className="group-left">
         {isBatchMode && (

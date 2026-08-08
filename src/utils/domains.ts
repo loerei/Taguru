@@ -1,4 +1,4 @@
-import { parseURL } from './sorter';
+import { parseURL, updateDomainOrderCache } from './sorter';
 import { SavedTab, SavedGroup } from '../types';
 import { saveGroups, getGroups } from './storage';
 
@@ -131,4 +131,41 @@ export async function saveDomainAsGroup(domains: string[]): Promise<SavedGroup |
   const currentGroups = await getGroups();
   await saveGroups([newGroup, ...currentGroups]);
   return newGroup;
+}
+
+export async function reorderDomainBlock(
+  draggedDomain: DomainGroup,
+  targetDomain: DomainGroup,
+  place: 'before' | 'after' = 'after'
+): Promise<void> {
+  if (typeof chrome === 'undefined' || !chrome.tabs) {
+    return;
+  }
+
+  if (draggedDomain.domain === targetDomain.domain) {
+    return;
+  }
+
+  const allTabs = await chrome.tabs.query({ currentWindow: true });
+  if (!allTabs || allTabs.length === 0) return;
+
+  const targetTabIds = targetDomain.tabIds;
+  if (targetTabIds.length === 0) return;
+
+  const targetTabObj = place === 'before'
+    ? allTabs.find((t) => t.id === targetTabIds[0])
+    : allTabs.find((t) => t.id === targetTabIds[targetTabIds.length - 1]);
+
+  if (!targetTabObj || targetTabObj.index === undefined) return;
+
+  let targetIndex = targetTabObj.index;
+  if (place === 'after') {
+    targetIndex += 1;
+  }
+
+  const tabIdsToMove = draggedDomain.tabIds;
+  if (tabIdsToMove.length === 0) return;
+
+  await chrome.tabs.move(tabIdsToMove, { index: targetIndex });
+  updateDomainOrderCache(draggedDomain.tabs as any);
 }

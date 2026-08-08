@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DomainGroup } from '../utils/domains';
+import { DomainGroup, reorderDomainBlock } from '../utils/domains';
 import { DomainItem } from './DomainItem';
 import { compareCustomStrings } from '../utils/sorter';
 
@@ -23,6 +23,8 @@ export const DomainList: React.FC<DomainListProps> = ({
   const [sortOrder, setSortOrder] = useState<'alpha' | 'count'>('alpha');
   const [isBatchMode, setIsBatchMode] = useState<boolean>(false);
   const [selectedDomains, setSelectedDomains] = useState<Set<string>>(new Set());
+  const [draggedDomain, setDraggedDomain] = useState<string | null>(null);
+  const [dragOverTarget, setDragOverTarget] = useState<{ domain: string; position: 'before' | 'after' } | null>(null);
 
   const handleToggleSelect = (domain: string) => {
     setSelectedDomains((prev) => {
@@ -44,6 +46,55 @@ export const DomainList: React.FC<DomainListProps> = ({
     }
   };
 
+  const handleDragStart = (e: React.DragEvent, domain: string) => {
+    setDraggedDomain(domain);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', domain);
+  };
+
+  const handleDragOver = (e: React.DragEvent, targetDomain: string) => {
+    e.preventDefault();
+    if (!draggedDomain || draggedDomain === targetDomain) return;
+    e.dataTransfer.dropEffect = 'move';
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const offsetY = e.clientY - rect.top;
+    const position: 'before' | 'after' = offsetY < rect.height / 2 ? 'before' : 'after';
+
+    if (dragOverTarget?.domain !== targetDomain || dragOverTarget?.position !== position) {
+      setDragOverTarget({ domain: targetDomain, position });
+    }
+  };
+
+  const handleDragLeave = () => {
+    // Left drag area
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetDomain: string) => {
+    e.preventDefault();
+    const dragged = draggedDomain || e.dataTransfer.getData('text/plain');
+    if (!dragged || dragged === targetDomain || !dragOverTarget) {
+      setDraggedDomain(null);
+      setDragOverTarget(null);
+      return;
+    }
+
+    const draggedGroup = domains.find((d) => d.domain === dragged);
+    const targetGroup = domains.find((d) => d.domain === targetDomain);
+
+    if (draggedGroup && targetGroup) {
+      await reorderDomainBlock(draggedGroup, targetGroup, dragOverTarget.position);
+    }
+
+    setDraggedDomain(null);
+    setDragOverTarget(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedDomain(null);
+    setDragOverTarget(null);
+  };
+
   const sortedDomains = [...domains].sort((a, b) => {
     if (sortOrder === 'count') {
       if (b.count !== a.count) {
@@ -51,7 +102,6 @@ export const DomainList: React.FC<DomainListProps> = ({
       }
     }
     if (isAutoSortFSO && sortOrder === 'alpha') {
-      // Preserve real-time window First-Seen Order (FSO) without re-sorting alphabetically
       return 0;
     }
     return compareCustomStrings(a.domain, b.domain);
@@ -127,11 +177,19 @@ export const DomainList: React.FC<DomainListProps> = ({
             item={item}
             isBatchMode={isBatchMode}
             isSelected={selectedDomains.has(item.domain)}
+            isAutoSortFSO={isAutoSortFSO}
             closeDomainOnMiddleClick={closeDomainOnMiddleClick}
             onToggleSelect={handleToggleSelect}
             onMoveToNewWindow={(d) => onMoveToNewWindow([d])}
             onSaveAsGroup={(d) => onSaveAsGroup([d])}
             onDelete={(d) => onDelete([d])}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onDragEnd={handleDragEnd}
+            dragOverPosition={dragOverTarget?.domain === item.domain ? dragOverTarget.position : null}
+            isDraggingThis={draggedDomain === item.domain}
           />
         ))}
       </div>
