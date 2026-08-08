@@ -5,6 +5,15 @@ All notable changes to the Taguru extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - Unreleased
+
+### Added
+- **Domain Favicon Rendering**: Displayed 18x18 px domain favicon icons on domain cards with automatic SVG globe fallback for missing or broken favicons.
+- **Horizontal Compact Domain Card Layout**: Aligned tab counts horizontally on the same line as domain names, reducing domain item vertical card height by ~35% for maximum screen space efficiency.
+
+### Fixed
+- **Sub-Radio Group Layout**: Fixed overlapping sub-radio buttons under `WHEN YOU DRAG A TAB` in Auto Sort Settings by enforcing vertical flex-column container styling.
+
 ## [1.0.1] - 2026-08-08
 
 ### Added
@@ -32,5 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Two-Tiered Grayed-Out Settings UI**: Visual distinction between unselected options (interactive input, dimmed text) vs unavailable options (fully grayed out, disabled pointer events).
 - **Documentation & Legal Assets**: Generated `README.md`, `PRIVACY.md`, and `LICENSE` (MIT).
 
+[1.0.2]: https://github.com/loerei/Taguru/compare/v1.0.1...HEAD
 [1.0.1]: https://github.com/loerei/Taguru/releases/tag/v1.0.1
 [1.0.0]: https://github.com/loerei/Taguru/releases/tag/v1.0.0

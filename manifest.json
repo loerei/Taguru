@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Taguru",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Minimalist Tab Sorter and Saved Tab Groups Manager",
   "icons": {
     "16": "icons/icon16.png",
