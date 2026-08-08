@@ -1,5 +1,6 @@
 import { sortCurrentWindowTabs, moveDomainGroupToTabPosition } from './utils/sorter';
 import { getAutoSortEnabled, getAutoSortOptions } from './utils/storage';
+import { devLog } from './utils/logger';
 import { SortOptions } from './types';
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -17,7 +18,7 @@ async function attemptSort(
       err?.message?.includes('user may be dragging a tab') ||
       (typeof err === 'string' && (err as string).includes('user may be dragging a tab'));
     if (retries > 0 && isDragError) {
-      console.log(`[Taguru ServiceWorker] User still dragging, retrying in 300ms... (${retries} retries left)`);
+      devLog(`User still dragging, retrying in 300ms... (${retries} retries left)`);
       await new Promise((resolve) => setTimeout(resolve, 300));
       return attemptSort(windowId, options, retries - 1);
     }
@@ -38,7 +39,7 @@ async function attemptMoveDomainGroup(
       err?.message?.includes('user may be dragging a tab') ||
       (typeof err === 'string' && (err as string).includes('user may be dragging a tab'));
     if (retries > 0 && isDragError) {
-      console.log(`[Taguru ServiceWorker] User still dragging, retrying MBD in 300ms... (${retries} retries left)`);
+      devLog(`User still dragging, retrying MBD in 300ms... (${retries} retries left)`);
       await new Promise((resolve) => setTimeout(resolve, 300));
       return attemptMoveDomainGroup(windowId, movedTabId, options, retries - 1);
     }
@@ -53,7 +54,7 @@ async function triggerAutoSort(windowId?: number, reason = 'unknown') {
 
   const isEnabled = await getAutoSortEnabled();
   if (!isEnabled) {
-    console.log('[Taguru ServiceWorker] Auto Sort is OFF, skipping.');
+    devLog('Auto Sort is OFF, skipping.');
     return;
   }
 
@@ -66,9 +67,9 @@ async function triggerAutoSort(windowId?: number, reason = 'unknown') {
   debounceTimer = setTimeout(async () => {
     try {
       isSorting = true;
-      console.log(`[Taguru ServiceWorker] Triggering Auto Sort (reason: ${reason})`, options);
+      devLog(`Triggering Auto Sort (reason: ${reason})`, options);
       const count = await attemptSort(windowId, options);
-      console.log(`[Taguru ServiceWorker] Sorted ${count} tabs.`);
+      devLog(`Sorted ${count} tabs.`);
     } catch (err) {
       console.error('[Taguru ServiceWorker] Sort error:', err);
     } finally {
@@ -98,7 +99,7 @@ if (typeof chrome !== 'undefined' && chrome.tabs) {
           const mode: 'reFso' | 'mbd' | 'off' =
             opts.dragMode ?? (opts.autoReFso === false ? 'off' : 'reFso');
           if (mode === 'off') {
-            console.log('[Taguru ServiceWorker] Tab moved, but drag action is OFF. Skipping.');
+            devLog('Tab moved, but drag action is OFF. Skipping.');
             return;
           }
 
@@ -110,13 +111,13 @@ if (typeof chrome !== 'undefined' && chrome.tabs) {
             try {
               isSorting = true;
               if (mode === 'mbd') {
-                console.log(`[Taguru ServiceWorker] Triggering Move By Domain (MBD) for tab ${tabId}`);
+                devLog(`Triggering Move By Domain (MBD) for tab ${tabId}`);
                 const count = await attemptMoveDomainGroup(moveInfo.windowId, tabId, opts);
-                console.log(`[Taguru ServiceWorker] MBD moved ${count} tabs.`);
+                devLog(`MBD moved ${count} tabs.`);
               } else {
-                console.log(`[Taguru ServiceWorker] Triggering Auto Re-FSO for tab ${tabId}`);
+                devLog(`Triggering Auto Re-FSO for tab ${tabId}`);
                 const count = await attemptSort(moveInfo.windowId, opts);
-                console.log(`[Taguru ServiceWorker] Re-FSO sorted ${count} tabs.`);
+                devLog(`Re-FSO sorted ${count} tabs.`);
               }
             } catch (err) {
               console.error('[Taguru ServiceWorker] Drag action error:', err);

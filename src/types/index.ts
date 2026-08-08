@@ -19,4 +19,5 @@ export interface SortOptions {
   autoReFso?: boolean;
   dragMode?: 'reFso' | 'mbd' | 'off';
   closeDomainOnMiddleClick?: boolean;
+  debugLogging?: boolean;
 }

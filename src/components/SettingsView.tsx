@@ -203,6 +203,23 @@ const SortOptionsCard: React.FC<SortOptionsCardProps> = ({
           <span className="toggle-subtext">Sort by URL parameters (?key=val, #anchor)</span>
         </div>
       </div>
+
+      {/* Dev Options */}
+      <div className="settings-level-group" style={{ marginTop: '12px', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
+        <h4 className="level-group-title">Developer Options</h4>
+        <div className={`toggle-row ${!options.debugLogging ? 'is-unselected' : ''}`}>
+          <label className="toggle-label" htmlFor={`${idPrefix}-debugLogging`}>
+            <input
+              id={`${idPrefix}-debugLogging`}
+              type="checkbox"
+              checked={!!options.debugLogging}
+              onChange={() => handleToggle('debugLogging')}
+            />
+            <span className="toggle-text">Enable Debug Logs</span>
+          </label>
+          <span className="toggle-subtext">Print verbose sorting and drag event logs to Developer Tools console</span>
+        </div>
+      </div>
     </div>
   );
 };
