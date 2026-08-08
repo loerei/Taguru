@@ -254,7 +254,30 @@ body.sidepanel-body {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  max-height: 50px;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              max-height 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              margin 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.15s ease,
+              background-color 0.15s ease;
+}
+
+.group-item.is-exiting {
+  opacity: 0;
+  transform: scale(0.95) translateY(-4px);
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  border-top-width: 0;
+  border-bottom-width: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .group-item:hover {

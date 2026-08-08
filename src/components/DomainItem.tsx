@@ -23,7 +23,16 @@ export const DomainItem: React.FC<DomainItemProps> = ({
   onDelete
 }) => {
   const [imgError, setImgError] = useState<boolean>(false);
+  const [isExiting, setIsExiting] = useState<boolean>(false);
   const firstFavIcon = item.tabs.find((t) => !!t.favIconUrl)?.favIconUrl;
+
+  const triggerDelete = () => {
+    if (isExiting) return;
+    setIsExiting(true);
+    setTimeout(() => {
+      onDelete(item.domain);
+    }, 220);
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 1 && closeDomainOnMiddleClick) {
@@ -36,13 +45,13 @@ export const DomainItem: React.FC<DomainItemProps> = ({
     if (e.button === 1 && closeDomainOnMiddleClick) {
       e.preventDefault();
       e.stopPropagation();
-      onDelete(item.domain);
+      triggerDelete();
     }
   };
 
   return (
     <div
-      className={`group-item domain-item ${isSelected ? 'selected' : ''}`}
+      className={`group-item domain-item ${isSelected ? 'selected' : ''} ${isExiting ? 'is-exiting' : ''}`}
       onMouseDown={handleMouseDown}
       onAuxClick={handleAuxClick}
     >
@@ -107,7 +116,7 @@ export const DomainItem: React.FC<DomainItemProps> = ({
         <button
           type="button"
           className="icon-btn icon-btn-danger"
-          onClick={() => onDelete(item.domain)}
+          onClick={triggerDelete}
           title="Close domain tabs"
         >
           <svg className="svg-icon" viewBox="0 0 24 24">
