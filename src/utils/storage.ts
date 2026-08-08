@@ -12,7 +12,8 @@ export const DEFAULT_SORT_OPTIONS: SortOptions = {
   sortByPathSegments: false,
   sortByQueryAndHash: false,
   autoReFso: true,
-  dragMode: 'reFso'
+  dragMode: 'reFso',
+  closeDomainOnMiddleClick: false
 };
 
 export const DEFAULT_DOMAIN_ONLY_SORT_OPTIONS: SortOptions = {
@@ -221,7 +222,8 @@ function parseSortOptions(raw: any, legacyLevel?: string): SortOptions {
       sortByPathSegments: raw.sortByPathSegments ?? false,
       sortByQueryAndHash: raw.sortByQueryAndHash ?? false,
       autoReFso: dragModeVal !== 'off',
-      dragMode: dragModeVal
+      dragMode: dragModeVal,
+      closeDomainOnMiddleClick: raw.closeDomainOnMiddleClick ?? false
     };
   }
   if (legacyLevel === 'full') {

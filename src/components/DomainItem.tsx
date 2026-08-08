@@ -5,6 +5,7 @@ interface DomainItemProps {
   item: DomainGroup;
   isBatchMode: boolean;
   isSelected: boolean;
+  closeDomainOnMiddleClick?: boolean;
   onToggleSelect: (domain: string) => void;
   onMoveToNewWindow: (domain: string) => void;
   onSaveAsGroup: (domain: string) => void;
@@ -15,13 +16,25 @@ export const DomainItem: React.FC<DomainItemProps> = ({
   item,
   isBatchMode,
   isSelected,
+  closeDomainOnMiddleClick = false,
   onToggleSelect,
   onMoveToNewWindow,
   onSaveAsGroup,
   onDelete
 }) => {
+  const handleAuxClick = (e: React.MouseEvent) => {
+    if (e.button === 1 && closeDomainOnMiddleClick) {
+      e.preventDefault();
+      e.stopPropagation();
+      onDelete(item.domain);
+    }
+  };
+
   return (
-    <div className={`group-item domain-item ${isSelected ? 'selected' : ''}`}>
+    <div
+      className={`group-item domain-item ${isSelected ? 'selected' : ''}`}
+      onAuxClick={handleAuxClick}
+    >
       <div className="group-left">
         {isBatchMode && (
           <input

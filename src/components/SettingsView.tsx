@@ -66,6 +66,20 @@ const SortOptionsCard: React.FC<SortOptionsCardProps> = ({
           <span className="toggle-subtext">Group tabs from the same website together</span>
         </div>
 
+        <div className={`toggle-row ${!options.closeDomainOnMiddleClick ? 'is-unselected' : ''} ${isSubOptionsDisabled ? 'is-unavailable' : ''}`}>
+          <label className="toggle-label" htmlFor={`${idPrefix}-closeDomainOnMiddleClick`}>
+            <input
+              id={`${idPrefix}-closeDomainOnMiddleClick`}
+              type="checkbox"
+              checked={!!options.closeDomainOnMiddleClick && !isSubOptionsDisabled}
+              disabled={isSubOptionsDisabled}
+              onChange={() => handleToggle('closeDomainOnMiddleClick')}
+            />
+            <span className="toggle-text">Middle-Click Domain Close</span>
+          </label>
+          <span className="toggle-subtext">Middle-click any domain card in Taguru to close all its tabs</span>
+        </div>
+
         {/* Domain Order Strategy Radio Group */}
         <div className={`radio-group-container ${isSubOptionsDisabled ? 'is-unavailable' : ''}`}>
           <span className="radio-group-title">Domain Order</span>

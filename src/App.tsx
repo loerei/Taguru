@@ -184,6 +184,7 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
         {activeView === 'domains' && (
           <DomainList
             domains={domains}
+            closeDomainOnMiddleClick={manualSortOptions.closeDomainOnMiddleClick}
             onMoveToNewWindow={handleDomainMoveToNewWindow}
             onSaveAsGroup={handleDomainSaveAsGroup}
             onDelete={handleDomainDelete}

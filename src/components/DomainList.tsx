@@ -5,6 +5,7 @@ import { compareCustomStrings } from '../utils/sorter';
 
 interface DomainListProps {
   domains: DomainGroup[];
+  closeDomainOnMiddleClick?: boolean;
   onMoveToNewWindow: (domains: string[]) => void;
   onSaveAsGroup: (domains: string[]) => void;
   onDelete: (domains: string[]) => void;
@@ -12,6 +13,7 @@ interface DomainListProps {
 
 export const DomainList: React.FC<DomainListProps> = ({
   domains,
+  closeDomainOnMiddleClick = false,
   onMoveToNewWindow,
   onSaveAsGroup,
   onDelete
@@ -119,6 +121,7 @@ export const DomainList: React.FC<DomainListProps> = ({
             item={item}
             isBatchMode={isBatchMode}
             isSelected={selectedDomains.has(item.domain)}
+            closeDomainOnMiddleClick={closeDomainOnMiddleClick}
             onToggleSelect={handleToggleSelect}
             onMoveToNewWindow={(d) => onMoveToNewWindow([d])}
             onSaveAsGroup={(d) => onSaveAsGroup([d])}

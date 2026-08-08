@@ -18,4 +18,5 @@ export interface SortOptions {
   sortByQueryAndHash: boolean;
   autoReFso?: boolean;
   dragMode?: 'reFso' | 'mbd' | 'off';
+  closeDomainOnMiddleClick?: boolean;
 }
