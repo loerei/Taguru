@@ -282,7 +282,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         <div className="settings-level-group">
           {/* Extension Icon Click Default View Radio Group */}
           <div className="radio-group-container">
-            <span className="radio-group-title">EXTENSION ICON CLICK BEHAVIOR</span>
+            <span className="radio-group-title">OPEN BEHAVIOR (TOOLBAR ICON & CTRL+SHIFT+E)</span>
             <div className="radio-options">
               <div className={`radio-option ${clickBehavior === 'popup' ? '' : 'is-unselected'}`}>
                 <label className="radio-label" htmlFor="general-click-popup">
@@ -295,7 +295,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   />
                   <span className="radio-text">Open Popup (Default)</span>
                 </label>
-                <span className="radio-subtext">Clicking extension icon opens compact popup window</span>
+                <span className="radio-subtext">Clicking extension icon or pressing Ctrl+Shift+E opens compact popup window</span>
               </div>
               <div className={`radio-option ${clickBehavior === 'sidepanel' ? '' : 'is-unselected'}`}>
                 <label className="radio-label" htmlFor="general-click-sidepanel">
@@ -308,7 +308,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   />
                   <span className="radio-text">Open Side Panel</span>
                 </label>
-                <span className="radio-subtext">Clicking extension icon opens persistent sidebar panel</span>
+                <span className="radio-subtext">Clicking extension icon or pressing Ctrl+Shift+E opens persistent sidebar panel</span>
               </div>
             </div>
           </div>
