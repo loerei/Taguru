@@ -5,7 +5,7 @@ All notable changes to the Taguru extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.1] - Unreleased
+## [1.0.1] - 2026-08-08
 
 ### Added
 - **Middle-Click Domain Close**: Added optional toggle (`closeDomainOnMiddleClick`, default OFF) allowing users to middle-click any domain card in Taguru to close all tabs from that website.
@@ -32,5 +32,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Two-Tiered Grayed-Out Settings UI**: Visual distinction between unselected options (interactive input, dimmed text) vs unavailable options (fully grayed out, disabled pointer events).
 - **Documentation & Legal Assets**: Generated `README.md`, `PRIVACY.md`, and `LICENSE` (MIT).
 
-[1.0.1]: https://github.com/loerei/Taguru/compare/v1.0.0...HEAD
+[1.0.1]: https://github.com/loerei/Taguru/releases/tag/v1.0.1
 [1.0.0]: https://github.com/loerei/Taguru/releases/tag/v1.0.0
