@@ -5,6 +5,16 @@ All notable changes to the Taguru extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - Unreleased
+
+### Added
+- **Real-Time Tab Position Snapshot Logging**: Added real-time tab layout snapshot logs after every sort, drag, MBD placement, and startup operation.
+
+### Fixed
+- **MBD Single-Tab Domain Bypass & Split Domain Prevention**:
+  - Fixed single-tab domain bypass in `moveDomainGroupToTabPosition` so 1-tab domains execute inter-domain relocation when dropped into/across another domain.
+  - Refined `isContiguous` split domain detection to check if tabs before and after the moved domain belong to the same non-moved domain, preventing target domains from ever being split.
+
 ## [1.0.2] - 2026-08-08
 
 ### Added
@@ -46,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Two-Tiered Grayed-Out Settings UI**: Visual distinction between unselected options (interactive input, dimmed text) vs unavailable options (fully grayed out, disabled pointer events).
 - **Documentation & Legal Assets**: Generated `README.md`, `PRIVACY.md`, and `LICENSE` (MIT).
 
+[1.0.3]: https://github.com/loerei/Taguru/compare/v1.0.2...HEAD
 [1.0.2]: https://github.com/loerei/Taguru/releases/tag/v1.0.2
 [1.0.1]: https://github.com/loerei/Taguru/releases/tag/v1.0.1
 [1.0.0]: https://github.com/loerei/Taguru/releases/tag/v1.0.0
