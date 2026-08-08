@@ -23,6 +23,7 @@ Taguru automatically organizes, groups, and sorts your browser tabs by domain an
 ## ✨ Features
 
 - 🌐 **Domain Grouping**: Keep tabs from the same website together.
+- ⚡ **Auto Sort**: Re-groups tabs automatically as you browse.
 - 📌 **First-Seen Order**: Preserve your natural domain layout as you browse.
 - 🔀 **Move By Domain**: Drag any tab to move all tabs from that website at once.
 - 🎛️ **Sidebar & Popup Modes**: Use Taguru as a side panel or a quick toolbar popup.
