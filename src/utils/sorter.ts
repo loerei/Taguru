@@ -346,10 +346,6 @@ export async function moveDomainGroupToTabPosition(
     (t) => parseURL(getTabUrl(t)).domain !== movedDomain
   );
 
-  if (domainTabs.length <= 1) {
-    return 0;
-  }
-
   const firstIndex = targetTabs.findIndex(
     (t) => parseURL(getTabUrl(t)).domain === movedDomain
   );
@@ -369,8 +365,18 @@ export async function moveDomainGroupToTabPosition(
     }
   }
 
-  // Case A: Internal Drag within contiguous domain group
-  if (isContiguous) {
+  // If movedDomain is currently splitting another domain (e.g., domain before firstIndex == domain after lastIndex),
+  // then it cannot be treated as contiguous internal drag.
+  if (isContiguous && firstIndex > 0 && lastIndex < targetTabs.length - 1) {
+    const domainBefore = parseURL(getTabUrl(targetTabs[firstIndex - 1])).domain;
+    const domainAfter = parseURL(getTabUrl(targetTabs[lastIndex + 1])).domain;
+    if (domainBefore === domainAfter && domainBefore !== movedDomain) {
+      isContiguous = false;
+    }
+  }
+
+  // Case A: Internal Drag within contiguous domain group (Only when domain has multiple tabs and isn't splitting another domain)
+  if (isContiguous && domainTabs.length > 1) {
     // Always sync RAM Cache with the user's new internal tab order
     updateDomainOrderCache(targetTabs);
 
