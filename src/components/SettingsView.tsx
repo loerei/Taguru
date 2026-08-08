@@ -66,20 +66,6 @@ const SortOptionsCard: React.FC<SortOptionsCardProps> = ({
           <span className="toggle-subtext">Group tabs from the same website together</span>
         </div>
 
-        <div className={`toggle-row ${!options.closeDomainOnMiddleClick ? 'is-unselected' : ''} ${isSubOptionsDisabled ? 'is-unavailable' : ''}`}>
-          <label className="toggle-label" htmlFor={`${idPrefix}-closeDomainOnMiddleClick`}>
-            <input
-              id={`${idPrefix}-closeDomainOnMiddleClick`}
-              type="checkbox"
-              checked={!!options.closeDomainOnMiddleClick && !isSubOptionsDisabled}
-              disabled={isSubOptionsDisabled}
-              onChange={() => handleToggle('closeDomainOnMiddleClick')}
-            />
-            <span className="toggle-text">Middle-Click Domain Close</span>
-          </label>
-          <span className="toggle-subtext">Middle-click any domain card in Taguru to close all its tabs</span>
-        </div>
-
         {/* Domain Order Strategy Radio Group */}
         <div className={`radio-group-container ${isSubOptionsDisabled ? 'is-unavailable' : ''}`}>
           <span className="radio-group-title">Domain Order</span>
@@ -221,6 +207,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const isReleaseMode = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'release';
   const [logStatus, setLogStatus] = useState<string | null>(null);
 
+  const isMiddleClickCloseEnabled = !!manualSortOptions.closeDomainOnMiddleClick || !!autoSortOptions.closeDomainOnMiddleClick;
+
+  const handleToggleMiddleClickClose = () => {
+    const nextVal = !isMiddleClickCloseEnabled;
+    onManualOptionsChange({ ...manualSortOptions, closeDomainOnMiddleClick: nextVal });
+    onAutoOptionsChange({ ...autoSortOptions, closeDomainOnMiddleClick: nextVal });
+  };
+
   const handleToggleDebugLogging = () => {
     onAutoOptionsChange({
       ...autoSortOptions,
@@ -265,6 +259,28 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         onChange={onAutoOptionsChange}
         isAutoSortCard={true}
       />
+
+      {/* General Settings Section */}
+      <div className="settings-card general-settings-card">
+        <div className="settings-header">
+          <h3 className="settings-title">General Settings</h3>
+          <p className="settings-desc">Mouse shortcuts and interaction preferences</p>
+        </div>
+        <div className="settings-level-group">
+          <div className={`toggle-row ${!isMiddleClickCloseEnabled ? 'is-unselected' : ''}`}>
+            <label className="toggle-label" htmlFor="general-closeDomainOnMiddleClick">
+              <input
+                id="general-closeDomainOnMiddleClick"
+                type="checkbox"
+                checked={isMiddleClickCloseEnabled}
+                onChange={handleToggleMiddleClickClose}
+              />
+              <span className="toggle-text">Middle-Click Domain Close</span>
+            </label>
+            <span className="toggle-subtext">Middle-click any domain card in Taguru to close all its tabs</span>
+          </div>
+        </div>
+      </div>
 
       {/* Developer Options Section (Hidden only in release build mode) */}
       {!isReleaseMode && (

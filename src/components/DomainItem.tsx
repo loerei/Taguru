@@ -25,6 +25,13 @@ export const DomainItem: React.FC<DomainItemProps> = ({
   const [imgError, setImgError] = useState<boolean>(false);
   const firstFavIcon = item.tabs.find((t) => !!t.favIconUrl)?.favIconUrl;
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 1 && closeDomainOnMiddleClick) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   const handleAuxClick = (e: React.MouseEvent) => {
     if (e.button === 1 && closeDomainOnMiddleClick) {
       e.preventDefault();
@@ -36,6 +43,7 @@ export const DomainItem: React.FC<DomainItemProps> = ({
   return (
     <div
       className={`group-item domain-item ${isSelected ? 'selected' : ''}`}
+      onMouseDown={handleMouseDown}
       onAuxClick={handleAuxClick}
     >
       <div className="group-left">
