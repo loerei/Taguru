@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:release": "tsc && vite build --mode release && powershell -Command \"Compress-Archive -Path dist\\* -DestinationPath taguru-release.zip -Force\"",
     "preview": "vite preview"
   },
   "dependencies": {
