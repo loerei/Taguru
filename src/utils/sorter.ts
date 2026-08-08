@@ -376,6 +376,7 @@ export async function moveDomainGroupToTabPosition(
 
     // If Level B sub-path sorting is NOT requested, respect the user's manual internal order
     if (!opts.sortByPathSegments && !opts.sortByQueryAndHash) {
+      await logTabPositionsSnapshot('Inter-Domain Drag (Internal/0 moved)');
       return 0;
     }
     // If Level B is requested, sort domainTabs internally

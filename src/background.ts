@@ -137,6 +137,7 @@ if (typeof chrome !== 'undefined') {
                   devLog(`Triggering Move By Domain (MBD) for tab ${tabId}`);
                   const count = await attemptMoveDomainGroup(moveInfo.windowId, tabId, opts);
                   devLog(`MBD moved ${count} tabs.`);
+                  await logTabPositionsSnapshot(`MBD Drag Complete (${count} moved)`);
                 } else {
                   devLog(`Triggering Auto Re-FSO for tab ${tabId}`);
                   const count = await attemptSort(moveInfo.windowId, opts);
