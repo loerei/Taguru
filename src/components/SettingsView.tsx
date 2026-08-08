@@ -90,33 +90,33 @@ const SortOptionsCard: React.FC<SortOptionsCardProps> = ({
                   <span className="sub-radio-title">WHEN YOU DRAG A TAB</span>
                   <div className="sub-radio-options">
                     <div className="sub-radio-item">
-                      <label className="sub-radio-label" htmlFor={`${idPrefix}-dragMode-reFso`}>
-                        <input
-                          id={`${idPrefix}-dragMode-reFso`}
-                          type="radio"
-                          name={`${idPrefix}-dragMode`}
-                          checked={(options.dragMode ?? 'reFso') === 'reFso'}
-                          disabled={isSubOptionsDisabled}
-                          onChange={() => handleDragModeChange('reFso')}
-                        />
-                        <span className="sub-radio-text">Re-Group Domain (Default)</span>
-                      </label>
-                      <span className="sub-radio-subtext">Pull misplaced tab back to its domain</span>
-                    </div>
-
-                    <div className="sub-radio-item">
                       <label className="sub-radio-label" htmlFor={`${idPrefix}-dragMode-mbd`}>
                         <input
                           id={`${idPrefix}-dragMode-mbd`}
                           type="radio"
                           name={`${idPrefix}-dragMode`}
-                          checked={options.dragMode === 'mbd'}
+                          checked={(options.dragMode ?? 'mbd') === 'mbd'}
                           disabled={isSubOptionsDisabled}
                           onChange={() => handleDragModeChange('mbd')}
                         />
-                        <span className="sub-radio-text">Move Entire Domain (MBD)</span>
+                        <span className="sub-radio-text">Move Entire Domain (MBD) (Default)</span>
                       </label>
                       <span className="sub-radio-subtext">Move all tabs from that domain to the new position</span>
+                    </div>
+
+                    <div className="sub-radio-item">
+                      <label className="sub-radio-label" htmlFor={`${idPrefix}-dragMode-reFso`}>
+                        <input
+                          id={`${idPrefix}-dragMode-reFso`}
+                          type="radio"
+                          name={`${idPrefix}-dragMode`}
+                          checked={options.dragMode === 'reFso'}
+                          disabled={isSubOptionsDisabled}
+                          onChange={() => handleDragModeChange('reFso')}
+                        />
+                        <span className="sub-radio-text">Re-Group Domain</span>
+                      </label>
+                      <span className="sub-radio-subtext">Pull misplaced tab back to its domain</span>
                     </div>
 
                     <div className="sub-radio-item">

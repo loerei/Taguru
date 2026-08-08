@@ -12,7 +12,7 @@ export const DEFAULT_SORT_OPTIONS: SortOptions = {
   sortByPathSegments: false,
   sortByQueryAndHash: false,
   autoReFso: true,
-  dragMode: 'reFso',
+  dragMode: 'mbd',
   closeDomainOnMiddleClick: false,
   debugLogging: false
 };
