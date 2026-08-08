@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SortOptions } from '../types';
+import { clearDebugLogs, exportDebugLogsAsFile, copyDebugLogsToClipboard } from '../utils/logger';
 
 interface SortOptionsCardProps {
   idPrefix: string;
@@ -42,6 +43,25 @@ const SortOptionsCard: React.FC<SortOptionsCardProps> = ({
 
   const isSubOptionsDisabled = !options.groupByDomain;
   const isReleaseMode = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'release';
+  const [logStatus, setLogStatus] = useState<string | null>(null);
+
+  const handleClearLogs = async () => {
+    await clearDebugLogs();
+    setLogStatus('Logs cleared');
+    setTimeout(() => setLogStatus(null), 3000);
+  };
+
+  const handleExportLogs = async () => {
+    await exportDebugLogsAsFile();
+    setLogStatus('Logs exported');
+    setTimeout(() => setLogStatus(null), 3000);
+  };
+
+  const handleCopyLogs = async () => {
+    const success = await copyDebugLogsToClipboard();
+    setLogStatus(success ? 'Logs copied to clipboard' : 'Failed to copy logs');
+    setTimeout(() => setLogStatus(null), 3000);
+  };
   const currentDragMode = options.dragMode ?? (options.autoReFso === false ? 'off' : 'reFso');
 
   return (
@@ -220,6 +240,24 @@ const SortOptionsCard: React.FC<SortOptionsCardProps> = ({
               <span className="toggle-text">Enable Debug Logs</span>
             </label>
             <span className="toggle-subtext">Print verbose sorting and drag event logs to Developer Tools console</span>
+            {options.debugLogging && (
+              <div className="log-actions-container" style={{ marginTop: '10px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <button type="button" className="btn btn-sm" onClick={handleExportLogs}>
+                  Export Logs (.txt)
+                </button>
+                <button type="button" className="btn btn-sm" onClick={handleCopyLogs}>
+                  Copy Logs
+                </button>
+                <button type="button" className="btn btn-sm btn-danger" onClick={handleClearLogs}>
+                  Clear Logs
+                </button>
+                {logStatus && (
+                  <span className="toggle-subtext" style={{ color: 'var(--accent-color)', marginLeft: '4px' }}>
+                    {logStatus}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

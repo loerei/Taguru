@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Middle-Click Domain Close**: Added optional toggle (`closeDomainOnMiddleClick`, default OFF) allowing users to middle-click any domain card in Taguru to close all tabs from that website.
-- **Enable Debug Logs**: Added developer logging utility (`devLog()`) and a toggle (`debugLogging`, default OFF) in Settings UI to control verbose console logging.
+- **Enable Debug Logs & Log Controls**: Added developer logging utility (`devLog()`) with timestamp buffering in `chrome.storage.local`. Added **Clear Logs**, **Export Logs (.txt)**, and **Copy Logs** buttons (without emojis) in Developer Options.
 - **Refined Move By Domain (MBD) Placement Rules**:
   - Implemented middle-tab threshold positioning: Dropping a tab at ≥ 50% of target domain C's space places the entire moved domain G after C (`ABCGD`), while dropping at < 50% places G before C (`ABGCD`).
   - Implemented adjacent domain swap rule: Dragging a tab from domain G upwards into an adjacent domain C unconditionally swaps their domain block order (`ABGC`), preventing domain C tabs from ever being split.

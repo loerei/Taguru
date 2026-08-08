@@ -1,25 +1,92 @@
 import { getAutoSortOptions, getManualSortOptions } from './storage';
 
+const MAX_LOG_ENTRIES = 1000;
+
+function formatTimestamp(): string {
+  const d = new Date();
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  const padMs = (n: number) => n.toString().padStart(3, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${padMs(d.getMilliseconds())}`;
+}
+
+async function saveLogToBuffer(entry: string): Promise<void> {
+  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+    return;
+  }
+  try {
+    const result = await chrome.storage.local.get('debugLogs');
+    const logs: string[] = Array.isArray(result.debugLogs) ? result.debugLogs : [];
+    logs.push(entry);
+    if (logs.length > MAX_LOG_ENTRIES) {
+      logs.splice(0, logs.length - MAX_LOG_ENTRIES);
+    }
+    await chrome.storage.local.set({ debugLogs: logs });
+  } catch (_e) {
+    // Ignore storage errors
+  }
+}
+
 export async function devLog(message: string, ...args: any[]): Promise<void> {
-  // Completely silence dev logs in Release mode
   if (typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'release') {
     return;
   }
 
-  // Always log in Vite dev server mode
+  const timestamp = formatTimestamp();
+  const formattedArgs = args.length > 0 ? ' ' + args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ') : '';
+  const logLine = `[${timestamp}] ${message}${formattedArgs}`;
+
   if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
     console.log(`[Taguru DevLog] ${message}`, ...args);
-    return;
   }
 
-  // Otherwise check user's debugLogging flag in storage
   try {
     const autoOpts = await getAutoSortOptions();
     const manualOpts = await getManualSortOptions();
     if (autoOpts.debugLogging || manualOpts.debugLogging) {
       console.log(`[Taguru DevLog] ${message}`, ...args);
+      await saveLogToBuffer(logLine);
     }
   } catch (_e) {
     // Silent fallback
+  }
+}
+
+export async function getDebugLogs(): Promise<string[]> {
+  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+    return [];
+  }
+  const result = await chrome.storage.local.get('debugLogs');
+  return Array.isArray(result.debugLogs) ? result.debugLogs : [];
+}
+
+export async function clearDebugLogs(): Promise<void> {
+  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+    return;
+  }
+  await chrome.storage.local.remove('debugLogs');
+}
+
+export async function exportDebugLogsAsFile(): Promise<void> {
+  const logs = await getDebugLogs();
+  const content = logs.length > 0 ? logs.join('\n') : 'No log entries recorded.';
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `taguru-debug-logs-${Date.now()}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export async function copyDebugLogsToClipboard(): Promise<boolean> {
+  const logs = await getDebugLogs();
+  const content = logs.length > 0 ? logs.join('\n') : 'No log entries recorded.';
+  try {
+    await navigator.clipboard.writeText(content);
+    return true;
+  } catch (_e) {
+    return false;
   }
 }
