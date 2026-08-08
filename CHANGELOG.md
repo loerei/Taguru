@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Refined Move By Domain (MBD) Placement Rules**:
   - Implemented middle-tab threshold positioning: Dropping a tab at ≥ 50% of target domain C's space places the entire moved domain G after C (`ABCGD`), while dropping at < 50% places G before C (`ABGCD`).
   - Implemented adjacent domain swap rule: Dragging a tab from domain G upwards into an adjacent domain C unconditionally swaps their domain block order (`ABGC`), preventing domain C tabs from ever being split.
+- **Startup RAM Cache Warm-Up**: Added `initDomainOrderCache()` in ServiceWorker startup, `onInstalled`, and `onStartup` to pre-warm `domainOrderCache` in RAM before the first drag action.
 
 ### Fixed
 - **RAM Cache Sync on Internal Drag**: Fixed RAM Cache stale order bug by forcing immediate `updateDomainOrderCache(targetTabs)` sync when tabs are re-ordered internally within a domain, preserving manual internal tab order across subsequent inter-domain drags.
