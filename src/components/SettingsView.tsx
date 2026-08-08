@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SortOptions } from '../types';
 import { clearDebugLogs, exportDebugLogsAsFile, copyDebugLogsToClipboard } from '../utils/logger';
-import { getDefaultClickBehavior, setDefaultClickBehavior } from '../utils/storage';
+import { getDefaultClickBehavior, setDefaultClickBehavior, getCustomShortcut, setCustomShortcut } from '../utils/storage';
 
 interface SortOptionsCardProps {
   idPrefix: string;
@@ -209,15 +209,70 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [logStatus, setLogStatus] = useState<string | null>(null);
   const [clickBehavior, setClickBehavior] = useState<'popup' | 'sidepanel'>('popup');
 
+  const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.userAgent);
+  const defaultShortcut = isMac ? 'Cmd+Shift+E' : 'Ctrl+Shift+E';
+  const [shortcutVal, setShortcutVal] = useState<string>(defaultShortcut);
+  const [isRecordingShortcut, setIsRecordingShortcut] = useState<boolean>(false);
+
   useEffect(() => {
     getDefaultClickBehavior().then((res) => {
       setClickBehavior(res);
+    });
+    getCustomShortcut().then((res) => {
+      setShortcutVal(res);
     });
   }, []);
 
   const handleBehaviorChange = async (mode: 'popup' | 'sidepanel') => {
     setClickBehavior(mode);
     await setDefaultClickBehavior(mode);
+  };
+
+  const handleShortcutKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.key === 'Backspace' || e.key === 'Delete') {
+      setShortcutVal('');
+      return;
+    }
+
+    const parts: string[] = [];
+    if (e.ctrlKey) parts.push('Ctrl');
+    if (e.metaKey) parts.push('Cmd');
+    if (e.altKey) parts.push('Alt');
+    if (e.shiftKey) parts.push('Shift');
+
+    const key = e.key.toUpperCase();
+    if (!['CONTROL', 'META', 'ALT', 'SHIFT', 'COMMAND'].includes(key)) {
+      parts.push(key);
+      const newCombo = parts.join('+');
+      setShortcutVal(newCombo);
+      setCustomShortcut(newCombo);
+    } else if (parts.length > 0) {
+      setShortcutVal(parts.join('+'));
+    }
+  };
+
+  const handleShortcutBlur = async () => {
+    setIsRecordingShortcut(false);
+    if (!shortcutVal.trim()) {
+      setShortcutVal(defaultShortcut);
+      await setCustomShortcut(defaultShortcut);
+    } else {
+      await setCustomShortcut(shortcutVal);
+    }
+  };
+
+  const handleResetShortcut = async () => {
+    setShortcutVal(defaultShortcut);
+    await setCustomShortcut(defaultShortcut);
+  };
+
+  const handleOpenNativeShortcuts = () => {
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+      chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
+    }
   };
 
   const isMiddleClickCloseEnabled = !!manualSortOptions.closeDomainOnMiddleClick || !!autoSortOptions.closeDomainOnMiddleClick;
@@ -282,7 +337,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         <div className="settings-level-group">
           {/* Extension Icon Click Default View Radio Group */}
           <div className="radio-group-container">
-            <span className="radio-group-title">OPEN BEHAVIOR (TOOLBAR ICON & CTRL+SHIFT+E)</span>
+            <span className="radio-group-title">OPEN BEHAVIOR (TOOLBAR ICON & SHORTCUT)</span>
             <div className="radio-options">
               <div className={`radio-option ${clickBehavior === 'popup' ? '' : 'is-unselected'}`}>
                 <label className="radio-label" htmlFor="general-click-popup">
@@ -295,7 +350,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   />
                   <span className="radio-text">Open Popup (Default)</span>
                 </label>
-                <span className="radio-subtext">Clicking extension icon or pressing Ctrl+Shift+E opens compact popup window</span>
+                <span className="radio-subtext">Clicking extension icon or pressing shortcut opens compact popup window</span>
               </div>
               <div className={`radio-option ${clickBehavior === 'sidepanel' ? '' : 'is-unselected'}`}>
                 <label className="radio-label" htmlFor="general-click-sidepanel">
@@ -308,9 +363,59 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   />
                   <span className="radio-text">Open Side Panel</span>
                 </label>
-                <span className="radio-subtext">Clicking extension icon or pressing Ctrl+Shift+E opens persistent sidebar panel</span>
+                <span className="radio-subtext">Clicking extension icon or pressing shortcut opens persistent sidebar panel</span>
               </div>
             </div>
+          </div>
+
+          {/* Extension Keyboard Shortcut Setting */}
+          <div className="radio-group-container" style={{ marginTop: '16px' }}>
+            <span className="radio-group-title">OPEN KEYBOARD SHORTCUT</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
+              <input
+                type="text"
+                className="shortcut-input"
+                value={shortcutVal || (isRecordingShortcut ? 'Press keys...' : '')}
+                onKeyDown={handleShortcutKeyDown}
+                onFocus={() => setIsRecordingShortcut(true)}
+                onBlur={handleShortcutBlur}
+                readOnly
+                placeholder={`Click to edit (${defaultShortcut})`}
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: isRecordingShortcut ? '1px solid var(--accent-color)' : '1px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                  borderRadius: '6px',
+                  padding: '6px 12px',
+                  fontSize: '12px',
+                  fontFamily: 'monospace',
+                  fontWeight: 'bold',
+                  width: '140px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  outline: 'none'
+                }}
+              />
+              <button
+                type="button"
+                className="btn btn-sm"
+                onClick={handleResetShortcut}
+                title="Reset to default shortcut"
+              >
+                Reset Default
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm"
+                onClick={handleOpenNativeShortcuts}
+                title="Configure OS-level shortcut in Chrome"
+              >
+                Chrome Shortcuts ↗
+              </button>
+            </div>
+            <span className="radio-subtext" style={{ marginTop: '6px', display: 'block' }}>
+              Click input and press key combination (e.g. {defaultShortcut}). Backspace clears input, leaving empty resets to default ({defaultShortcut}).
+            </span>
           </div>
 
           <div className={`toggle-row ${!isMiddleClickCloseEnabled ? 'is-unselected' : ''}`} style={{ marginTop: '14px' }}>

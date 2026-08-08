@@ -354,3 +354,34 @@ export async function setActiveViewStorage(view: 'groups' | 'domains' | 'setting
     });
   });
 }
+
+const SHORTCUT_KEY = 'taguru_custom_shortcut';
+
+export async function getCustomShortcut(): Promise<string> {
+  const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.userAgent);
+  const defaultShortcut = isMac ? 'Cmd+Shift+E' : 'Ctrl+Shift+E';
+  if (typeof chrome === 'undefined' || !chrome.storage?.local) {
+    const raw = localStorage.getItem(SHORTCUT_KEY);
+    return raw || defaultShortcut;
+  }
+  return new Promise((resolve) => {
+    chrome.storage.local.get([SHORTCUT_KEY], (res) => {
+      resolve(res[SHORTCUT_KEY] || defaultShortcut);
+    });
+  });
+}
+
+export async function setCustomShortcut(shortcut: string): Promise<void> {
+  const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.userAgent);
+  const defaultShortcut = isMac ? 'Cmd+Shift+E' : 'Ctrl+Shift+E';
+  const valToSave = shortcut.trim() || defaultShortcut;
+  if (typeof chrome === 'undefined' || !chrome.storage?.local) {
+    localStorage.setItem(SHORTCUT_KEY, valToSave);
+    return;
+  }
+  return new Promise((resolve) => {
+    chrome.storage.local.set({ [SHORTCUT_KEY]: valToSave }, () => {
+      resolve();
+    });
+  });
+}
