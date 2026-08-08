@@ -366,6 +366,9 @@ export async function moveDomainGroupToTabPosition(
 
   // Case A: Internal Drag within contiguous domain group
   if (isContiguous) {
+    // Always sync RAM Cache with the user's new internal tab order
+    updateDomainOrderCache(targetTabs);
+
     // If Level B sub-path sorting is NOT requested, respect the user's manual internal order
     if (!opts.sortByPathSegments && !opts.sortByQueryAndHash) {
       return 0;

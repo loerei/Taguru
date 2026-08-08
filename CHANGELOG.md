@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Implemented middle-tab threshold positioning: Dropping a tab at ≥ 50% of target domain C's space places the entire moved domain G after C (`ABCGD`), while dropping at < 50% places G before C (`ABGCD`).
   - Implemented adjacent domain swap rule: Dragging a tab from domain G upwards into an adjacent domain C unconditionally swaps their domain block order (`ABGC`), preventing domain C tabs from ever being split.
 
+### Fixed
+- **RAM Cache Sync on Internal Drag**: Fixed RAM Cache stale order bug by forcing immediate `updateDomainOrderCache(targetTabs)` sync when tabs are re-ordered internally within a domain, preserving manual internal tab order across subsequent inter-domain drags.
+
 ## [1.0.0] - 2026-08-08
 
 ### Added
