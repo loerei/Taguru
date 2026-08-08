@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Extension Icon Click Behavior Selector**: Added radio options in `General Settings` to choose whether clicking the extension toolbar icon defaults to opening the compact **Popup (Default)** window or opening the persistent **Side Panel (Sidebar)** via `chrome.sidePanel.setPanelBehavior`.
+- **Default Open Keyboard Shortcut (`Ctrl+Shift+E` / `Cmd+Shift+E`)**: Added native `_execute_action` keyboard shortcut in `manifest.json` to open Taguru as a Popup or Side Panel according to user settings.
 - **Real-Time Tab Position Snapshot Logging**: Added real-time tab layout snapshot logs after every sort, drag, MBD placement, and startup operation.
 
 ### Fixed
