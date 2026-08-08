@@ -260,6 +260,23 @@ export function sortTabList<T extends { pendingUrl?: string; url?: string }>(
   return sorted;
 }
 
+const domainOrderCache = new Map<string, number[]>();
+
+export function updateDomainOrderCache(tabs: { id?: number; pendingUrl?: string; url?: string }[]) {
+  const currentGroups = new Map<string, number[]>();
+  for (const tab of tabs) {
+    if (tab.id === undefined) continue;
+    const domain = parseURL(getTabUrl(tab)).domain;
+    if (!currentGroups.has(domain)) {
+      currentGroups.set(domain, []);
+    }
+    currentGroups.get(domain)!.push(tab.id);
+  }
+  for (const [domain, tabIds] of currentGroups) {
+    domainOrderCache.set(domain, tabIds);
+  }
+}
+
 export async function sortCurrentWindowTabs(
   windowId?: number,
   options?: SortOptions | 'domain' | 'full'
@@ -376,24 +393,91 @@ export async function moveDomainGroupToTabPosition(
   }
 
   // Case B: Inter-Domain Drag across other domains -> Consolidate into a cohesive block at target position
-  domainTabs.sort((a, b) =>
-    compareURLs(getTabUrl(a), getTabUrl(b), {
-      groupByDomain: true,
-      sortByCharRank: opts.sortByCharRank,
-      sortByPathSegments: true,
-      sortByQueryAndHash: true
-    })
-  );
+  const cachedTabIds = domainOrderCache.get(movedDomain);
+  if (cachedTabIds && cachedTabIds.length > 0) {
+    const orderMap = new Map<number, number>();
+    cachedTabIds.forEach((id: number, idx: number) => orderMap.set(id, idx));
+    domainTabs.sort((a, b) => {
+      const indexA = a.id !== undefined && orderMap.has(a.id) ? orderMap.get(a.id)! : 999999;
+      const indexB = b.id !== undefined && orderMap.has(b.id) ? orderMap.get(b.id)! : 999999;
+      return indexA - indexB;
+    });
+  } else if (opts.sortByPathSegments || opts.sortByQueryAndHash) {
+    domainTabs.sort((a, b) => compareURLs(getTabUrl(a), getTabUrl(b), opts));
+  }
 
   const movedIndexInTarget = targetTabs.findIndex((t) => t.id === movedTabId);
   if (movedIndexInTarget === -1) {
     return 0;
   }
 
+  // Find target domain C where movedTab was dropped
+  let targetDomainC: string | null = null;
+  if (movedIndexInTarget > 0) {
+    const prevDomain = parseURL(getTabUrl(targetTabs[movedIndexInTarget - 1])).domain;
+    if (prevDomain !== movedDomain) {
+      targetDomainC = prevDomain;
+    }
+  }
+  if (!targetDomainC && movedIndexInTarget < targetTabs.length - 1) {
+    const nextDomain = parseURL(getTabUrl(targetTabs[movedIndexInTarget + 1])).domain;
+    if (nextDomain !== movedDomain) {
+      targetDomainC = nextDomain;
+    }
+  }
+
   let nonDomainCountBefore = 0;
-  for (let i = 0; i < movedIndexInTarget; i += 1) {
-    if (parseURL(getTabUrl(targetTabs[i])).domain !== movedDomain) {
-      nonDomainCountBefore += 1;
+
+  if (targetDomainC) {
+    const cTabs = otherTabs.filter(
+      (t) => parseURL(getTabUrl(t)).domain === targetDomainC
+    );
+    const cFirstIndexInOther = otherTabs.findIndex(
+      (t) => parseURL(getTabUrl(t)).domain === targetDomainC
+    );
+    const cFirstIndexInTarget = targetTabs.findIndex(
+      (t) => parseURL(getTabUrl(t)).domain === targetDomainC
+    );
+
+    // Check if G and C were adjacent in targetTabs before move
+    const gFirstIndexInTarget = firstIndex;
+    const isGAfterC = gFirstIndexInTarget > cFirstIndexInTarget;
+
+    let otherDomainsBetweenCount = 0;
+    const rangeStart = Math.min(gFirstIndexInTarget, cFirstIndexInTarget);
+    const rangeEnd = Math.max(gFirstIndexInTarget, cFirstIndexInTarget);
+    for (let i = rangeStart; i < rangeEnd; i += 1) {
+      const d = parseURL(getTabUrl(targetTabs[i])).domain;
+      if (d !== movedDomain && d !== targetDomainC) {
+        otherDomainsBetweenCount += 1;
+      }
+    }
+    const isAdjacent = otherDomainsBetweenCount === 0;
+
+    if (isAdjacent && isGAfterC) {
+      // Special Adjacency Rule: G was adjacent after C and user dragged G UP into C -> Swap G before C
+      nonDomainCountBefore = cFirstIndexInOther;
+    } else if (isAdjacent && !isGAfterC) {
+      // Special Adjacency Rule: G was adjacent before C and user dragged G DOWN into C -> Swap G after C
+      nonDomainCountBefore = cFirstIndexInOther + cTabs.length;
+    } else {
+      // General Threshold Rule based on middle tab of domain C
+      const dropOffsetInC = movedIndexInTarget - cFirstIndexInTarget;
+      const middleOffset = cTabs.length / 2;
+
+      if (dropOffsetInC >= middleOffset) {
+        // Dropped at >= middle tab of C -> Place domain G AFTER domain C
+        nonDomainCountBefore = cFirstIndexInOther + cTabs.length;
+      } else {
+        // Dropped at < middle tab of C -> Place domain G BEFORE domain C
+        nonDomainCountBefore = cFirstIndexInOther;
+      }
+    }
+  } else {
+    for (let i = 0; i < movedIndexInTarget; i += 1) {
+      if (parseURL(getTabUrl(targetTabs[i])).domain !== movedDomain) {
+        nonDomainCountBefore += 1;
+      }
     }
   }
 
