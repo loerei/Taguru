@@ -5,7 +5,7 @@ All notable changes to the Taguru extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.3] - Unreleased
+## [1.0.3] - 2026-08-08
 
 ### Added
 - **Opening Tab View Persistence**: Saved and restored the user's active view tab (`Groups`, `Domains`, or `Settings`) in `chrome.storage.local` so opening the Popup or Side Panel automatically opens to the user's last visited view.
@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Real-Time Tab Position Snapshot Logging**: Added real-time tab layout snapshot logs after every sort, drag, MBD placement, and startup operation.
 
 ### Fixed
+- **MBD Adjacency Boundary Crossing Check**: Added boundary crossing validation (`didCrossBoundary`) so Adjacency Swap only triggers when a tab is dropped into or across an adjacent domain, preventing drag bounce when dropped at home boundaries.
+- **RAM Cache Map Insertion Order Reset**: Added `domainOrderCache.clear()` inside `updateDomainOrderCache()` so JavaScript `Map.keys()` accurately updates key insertion order after every tab move, eliminating stale key order lock loops.
 - **MBD Pre-Drag RAM Cache Direction Check**: Fixed single-tab domain drag bounce bug where dragging domain `A[1]` down after `B[1]` was miscalculated as an upward drag due to post-drag DOM tab state, causing `A[1]` to bounce back to the top. Implemented pre-drag index lookup in `domainOrderCache` to accurately calculate drag direction.
 - **MBD Single-Tab Domain Bypass & Split Domain Prevention**:
   - Fixed single-tab domain bypass in `moveDomainGroupToTabPosition` so 1-tab domains execute inter-domain relocation when dropped into/across another domain.

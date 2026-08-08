@@ -264,6 +264,7 @@ export function sortTabList<T extends { pendingUrl?: string; url?: string }>(
 const domainOrderCache = new Map<string, number[]>();
 
 export function updateDomainOrderCache(tabs: { id?: number; pendingUrl?: string; url?: string }[]) {
+  domainOrderCache.clear();
   const currentGroups = new Map<string, number[]>();
   for (const tab of tabs) {
     if (tab.id === undefined) continue;
@@ -457,6 +458,13 @@ export async function moveDomainGroupToTabPosition(
     const cFirstIndexInTarget = targetTabs.findIndex(
       (t) => parseURL(getTabUrl(t)).domain === targetDomainC
     );
+    let cLastIndexInTarget = -1;
+    for (let i = targetTabs.length - 1; i >= 0; i -= 1) {
+      if (parseURL(getTabUrl(targetTabs[i])).domain === targetDomainC) {
+        cLastIndexInTarget = i;
+        break;
+      }
+    }
 
     // Determine pre-drag relative domain positions from RAM Cache key insertion order
     const cacheKeys = Array.from(domainOrderCache.keys());
@@ -485,27 +493,44 @@ export async function moveDomainGroupToTabPosition(
     }
     const isAdjacent = otherDomainsBetweenCount === 0;
 
-    if (isAdjacent && isGAfterC) {
-      // G was adjacent AFTER C before the drag, user dragged G UP into C -> Swap G BEFORE C
+    // Check if G actually crossed C's domain boundary during drag
+    let didCrossBoundary = false;
+    if (isGAfterC) {
+      // G was pre-drag AFTER C -> G crossed boundary only if dropped at or before C's last tab
+      didCrossBoundary = movedIndexInTarget <= cLastIndexInTarget;
+    } else {
+      // G was pre-drag BEFORE C -> G crossed boundary only if dropped at or after C's first tab
+      didCrossBoundary = movedIndexInTarget >= cFirstIndexInTarget;
+    }
+
+    if (isAdjacent && isGAfterC && didCrossBoundary) {
+      // G was adjacent AFTER C and user dragged G UP into/across C -> Swap G BEFORE C
       nonDomainCountBefore = cFirstIndexInOther;
-    } else if (isAdjacent && !isGAfterC) {
-      // G was adjacent BEFORE C before the drag, user dragged G DOWN into C -> Swap G AFTER C
+    } else if (isAdjacent && !isGAfterC && didCrossBoundary) {
+      // G was adjacent BEFORE C and user dragged G DOWN into/across C -> Swap G AFTER C
       nonDomainCountBefore = cFirstIndexInOther + cTabs.length;
     } else {
-      // General Threshold Rule based on middle tab of domain C
-      const dropOffsetInC = movedIndexInTarget - cFirstIndexInTarget;
-      const middleOffset = cTabs.length / 2;
-
-      if (dropOffsetInC >= middleOffset) {
-        // Dropped at >= middle tab of C -> Place domain G AFTER domain C
+      // General Threshold Rule or Home-Boundary Fallback
+      if (isGAfterC && !didCrossBoundary) {
+        // User dropped G at/after its original position (after C) -> Keep G AFTER C
         nonDomainCountBefore = cFirstIndexInOther + cTabs.length;
-      } else {
-        // Dropped at < middle tab of C -> Place domain G BEFORE domain C
+      } else if (!isGAfterC && !didCrossBoundary) {
+        // User dropped G at/before its original position (before C) -> Keep G BEFORE C
         nonDomainCountBefore = cFirstIndexInOther;
+      } else {
+        // General Threshold Rule based on middle tab of domain C
+        const dropOffsetInC = movedIndexInTarget - cFirstIndexInTarget;
+        const middleOffset = cTabs.length / 2;
+
+        if (dropOffsetInC >= middleOffset) {
+          nonDomainCountBefore = cFirstIndexInOther + cTabs.length;
+        } else {
+          nonDomainCountBefore = cFirstIndexInOther;
+        }
       }
     }
 
-    devLog(`[MBD Placement Decision] moved='${movedDomain}' -> targetC='${targetDomainC}', preDragWasAfter=${isGAfterC} (hasCache=${hasCache}), isAdjacent=${isAdjacent}, placedAtOtherIndex=${nonDomainCountBefore}`);
+    devLog(`[MBD Placement Decision] moved='${movedDomain}' -> targetC='${targetDomainC}', preDragWasAfter=${isGAfterC} (hasCache=${hasCache}), isAdjacent=${isAdjacent}, didCrossBoundary=${didCrossBoundary}, placedAtOtherIndex=${nonDomainCountBefore}`);
   } else {
     for (let i = 0; i < movedIndexInTarget; i += 1) {
       if (parseURL(getTabUrl(targetTabs[i])).domain !== movedDomain) {
