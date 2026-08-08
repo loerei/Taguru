@@ -5,6 +5,7 @@ import { compareCustomStrings } from '../utils/sorter';
 
 interface DomainListProps {
   domains: DomainGroup[];
+  isAutoSortFSO?: boolean;
   closeDomainOnMiddleClick?: boolean;
   onMoveToNewWindow: (domains: string[]) => void;
   onSaveAsGroup: (domains: string[]) => void;
@@ -13,6 +14,7 @@ interface DomainListProps {
 
 export const DomainList: React.FC<DomainListProps> = ({
   domains,
+  isAutoSortFSO = false,
   closeDomainOnMiddleClick = false,
   onMoveToNewWindow,
   onSaveAsGroup,
@@ -47,6 +49,10 @@ export const DomainList: React.FC<DomainListProps> = ({
       if (b.count !== a.count) {
         return b.count - a.count;
       }
+    }
+    if (isAutoSortFSO && sortOrder === 'alpha') {
+      // Preserve real-time window First-Seen Order (FSO) without re-sorting alphabetically
+      return 0;
     }
     return compareCustomStrings(a.domain, b.domain);
   });

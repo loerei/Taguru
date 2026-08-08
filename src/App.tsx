@@ -61,6 +61,26 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
     getAutoSortOptions().then(setAutoSortOptionsState);
   }, [refreshGroups, refreshDomains]);
 
+  useEffect(() => {
+    if (typeof chrome === 'undefined' || !chrome.tabs) return;
+
+    const handleTabChange = () => {
+      refreshDomains();
+    };
+
+    chrome.tabs.onMoved?.addListener(handleTabChange);
+    chrome.tabs.onCreated?.addListener(handleTabChange);
+    chrome.tabs.onRemoved?.addListener(handleTabChange);
+    chrome.tabs.onUpdated?.addListener(handleTabChange);
+
+    return () => {
+      chrome.tabs.onMoved?.removeListener(handleTabChange);
+      chrome.tabs.onCreated?.removeListener(handleTabChange);
+      chrome.tabs.onRemoved?.removeListener(handleTabChange);
+      chrome.tabs.onUpdated?.removeListener(handleTabChange);
+    };
+  }, [refreshDomains]);
+
   const showStatus = (msg: string) => {
     setStatus(msg);
     setTimeout(() => {
@@ -184,6 +204,7 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
         {activeView === 'domains' && (
           <DomainList
             domains={domains}
+            isAutoSortFSO={isAutoSort && autoSortOptions.groupByDomain && !autoSortOptions.sortByCharRank}
             closeDomainOnMiddleClick={manualSortOptions.closeDomainOnMiddleClick}
             onMoveToNewWindow={handleDomainMoveToNewWindow}
             onSaveAsGroup={handleDomainSaveAsGroup}
