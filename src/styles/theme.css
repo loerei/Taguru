@@ -250,7 +250,7 @@ body.sidepanel-body {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 8px 10px;
+  padding: 5px 8px;
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 6px;
@@ -275,6 +275,31 @@ body.sidepanel-body {
   min-width: 0;
 }
 
+.domain-favicon-container {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.domain-favicon {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.domain-favicon-fallback {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
 .domain-checkbox {
   accent-color: var(--accent-primary);
   cursor: pointer;
@@ -291,7 +316,8 @@ body.sidepanel-body {
 
 .group-title-container {
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
+  gap: 6px;
   flex: 1;
   min-width: 0;
 }
@@ -324,8 +350,10 @@ body.sidepanel-body {
 }
 
 .group-meta {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Domain List Specific Toolbar */

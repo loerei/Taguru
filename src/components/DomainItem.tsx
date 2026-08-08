@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DomainGroup } from '../utils/domains';
 
 interface DomainItemProps {
@@ -22,6 +22,9 @@ export const DomainItem: React.FC<DomainItemProps> = ({
   onSaveAsGroup,
   onDelete
 }) => {
+  const [imgError, setImgError] = useState<boolean>(false);
+  const firstFavIcon = item.tabs.find((t) => !!t.favIconUrl)?.favIconUrl;
+
   const handleAuxClick = (e: React.MouseEvent) => {
     if (e.button === 1 && closeDomainOnMiddleClick) {
       e.preventDefault();
@@ -44,6 +47,22 @@ export const DomainItem: React.FC<DomainItemProps> = ({
             onChange={() => onToggleSelect(item.domain)}
           />
         )}
+        <div className="domain-favicon-container">
+          {firstFavIcon && !imgError ? (
+            <img
+              src={firstFavIcon}
+              alt=""
+              className="domain-favicon"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <svg className="svg-icon domain-favicon-fallback" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+          )}
+        </div>
         <div className="group-title-container">
           <span className="group-name">{item.domain}</span>
           <span className="group-meta">{item.count} tabs</span>
