@@ -289,3 +289,37 @@ export async function setAutoSortOptions(options: SortOptions): Promise<void> {
     });
   });
 }
+
+const ACTION_CLICK_BEHAVIOR_KEY = 'taguru_action_click_behavior';
+
+export async function getDefaultClickBehavior(): Promise<'popup' | 'sidepanel'> {
+  if (typeof chrome === 'undefined' || !chrome.storage?.local) {
+    const raw = localStorage.getItem(ACTION_CLICK_BEHAVIOR_KEY);
+    return (raw as 'popup' | 'sidepanel') || 'popup';
+  }
+  return new Promise((resolve) => {
+    chrome.storage.local.get([ACTION_CLICK_BEHAVIOR_KEY], (res) => {
+      resolve(res[ACTION_CLICK_BEHAVIOR_KEY] === 'sidepanel' ? 'sidepanel' : 'popup');
+    });
+  });
+}
+
+export async function setDefaultClickBehavior(behavior: 'popup' | 'sidepanel'): Promise<void> {
+  if (typeof chrome === 'undefined' || !chrome.storage?.local) {
+    localStorage.setItem(ACTION_CLICK_BEHAVIOR_KEY, behavior);
+  } else {
+    await new Promise<void>((resolve) => {
+      chrome.storage.local.set({ [ACTION_CLICK_BEHAVIOR_KEY]: behavior }, () => {
+        resolve();
+      });
+    });
+  }
+
+  if (typeof chrome !== 'undefined' && chrome.sidePanel && typeof chrome.sidePanel.setPanelBehavior === 'function') {
+    try {
+      await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: behavior === 'sidepanel' });
+    } catch (_e) {
+      // Ignore sidePanel API errors on unsupported browsers
+    }
+  }
+}

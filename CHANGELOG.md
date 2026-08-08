@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.3] - Unreleased
 
 ### Added
+- **Extension Icon Click Behavior Selector**: Added radio options in `General Settings` to choose whether clicking the extension toolbar icon defaults to opening the compact **Popup (Default)** window or opening the persistent **Side Panel (Sidebar)** via `chrome.sidePanel.setPanelBehavior`.
 - **Real-Time Tab Position Snapshot Logging**: Added real-time tab layout snapshot logs after every sort, drag, MBD placement, and startup operation.
 
 ### Fixed

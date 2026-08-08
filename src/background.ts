@@ -1,10 +1,20 @@
 import { sortCurrentWindowTabs, moveDomainGroupToTabPosition, updateDomainOrderCache } from './utils/sorter';
-import { getAutoSortEnabled, getAutoSortOptions } from './utils/storage';
+import { getAutoSortEnabled, getAutoSortOptions, getDefaultClickBehavior, setDefaultClickBehavior } from './utils/storage';
 import { devLog, logTabPositionsSnapshot } from './utils/logger';
 import { SortOptions } from './types';
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let isSorting = false;
+
+async function initActionClickBehavior() {
+  try {
+    const behavior = await getDefaultClickBehavior();
+    await setDefaultClickBehavior(behavior);
+  } catch (_e) {
+    // Ignore error
+  }
+}
+initActionClickBehavior();
 
 async function initDomainOrderCache() {
   if (typeof chrome === 'undefined' || !chrome.tabs) return;

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SortOptions } from '../types';
 import { clearDebugLogs, exportDebugLogsAsFile, copyDebugLogsToClipboard } from '../utils/logger';
+import { getDefaultClickBehavior, setDefaultClickBehavior } from '../utils/storage';
 
 interface SortOptionsCardProps {
   idPrefix: string;
@@ -206,6 +207,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 }) => {
   const isReleaseMode = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'release';
   const [logStatus, setLogStatus] = useState<string | null>(null);
+  const [clickBehavior, setClickBehavior] = useState<'popup' | 'sidepanel'>('popup');
+
+  useEffect(() => {
+    getDefaultClickBehavior().then((res) => {
+      setClickBehavior(res);
+    });
+  }, []);
+
+  const handleBehaviorChange = async (mode: 'popup' | 'sidepanel') => {
+    setClickBehavior(mode);
+    await setDefaultClickBehavior(mode);
+  };
 
   const isMiddleClickCloseEnabled = !!manualSortOptions.closeDomainOnMiddleClick || !!autoSortOptions.closeDomainOnMiddleClick;
 
@@ -264,10 +277,43 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       <div className="settings-card general-settings-card">
         <div className="settings-header">
           <h3 className="settings-title">General Settings</h3>
-          <p className="settings-desc">Mouse shortcuts and interaction preferences</p>
+          <p className="settings-desc">Mouse shortcuts and extension behavior preferences</p>
         </div>
         <div className="settings-level-group">
-          <div className={`toggle-row ${!isMiddleClickCloseEnabled ? 'is-unselected' : ''}`}>
+          {/* Extension Icon Click Default View Radio Group */}
+          <div className="radio-group-container">
+            <span className="radio-group-title">EXTENSION ICON CLICK BEHAVIOR</span>
+            <div className="radio-options">
+              <div className={`radio-option ${clickBehavior === 'popup' ? '' : 'is-unselected'}`}>
+                <label className="radio-label" htmlFor="general-click-popup">
+                  <input
+                    id="general-click-popup"
+                    type="radio"
+                    name="generalClickBehavior"
+                    checked={clickBehavior === 'popup'}
+                    onChange={() => handleBehaviorChange('popup')}
+                  />
+                  <span className="radio-text">Open Popup (Default)</span>
+                </label>
+                <span className="radio-subtext">Clicking extension icon opens compact popup window</span>
+              </div>
+              <div className={`radio-option ${clickBehavior === 'sidepanel' ? '' : 'is-unselected'}`}>
+                <label className="radio-label" htmlFor="general-click-sidepanel">
+                  <input
+                    id="general-click-sidepanel"
+                    type="radio"
+                    name="generalClickBehavior"
+                    checked={clickBehavior === 'sidepanel'}
+                    onChange={() => handleBehaviorChange('sidepanel')}
+                  />
+                  <span className="radio-text">Open Side Panel</span>
+                </label>
+                <span className="radio-subtext">Clicking extension icon opens persistent sidebar panel</span>
+              </div>
+            </div>
+          </div>
+
+          <div className={`toggle-row ${!isMiddleClickCloseEnabled ? 'is-unselected' : ''}`} style={{ marginTop: '14px' }}>
             <label className="toggle-label" htmlFor="general-closeDomainOnMiddleClick">
               <input
                 id="general-closeDomainOnMiddleClick"
