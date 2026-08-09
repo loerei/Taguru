@@ -138,7 +138,7 @@ export function parseURL(rawUrl: string): ParsedURL {
     }
 
     let queryAndHash = '';
-    const queryOrHashIndex = rest.search(/[\?#]/);
+    const queryOrHashIndex = rest.search(/[?#]/);
     let pathPart = rest;
 
     if (queryOrHashIndex !== -1) {
@@ -509,24 +509,21 @@ export async function moveDomainGroupToTabPosition(
     } else if (isAdjacent && !isGAfterC && didCrossBoundary) {
       // G was adjacent BEFORE C and user dragged G DOWN into/across C -> Swap G AFTER C
       nonDomainCountBefore = cFirstIndexInOther + cTabs.length;
+    } else if (isGAfterC && !didCrossBoundary) {
+      // User dropped G at/after its original position (after C) -> Keep G AFTER C
+      nonDomainCountBefore = cFirstIndexInOther + cTabs.length;
+    } else if (!isGAfterC && !didCrossBoundary) {
+      // User dropped G at/before its original position (before C) -> Keep G BEFORE C
+      nonDomainCountBefore = cFirstIndexInOther;
     } else {
-      // General Threshold Rule or Home-Boundary Fallback
-      if (isGAfterC && !didCrossBoundary) {
-        // User dropped G at/after its original position (after C) -> Keep G AFTER C
-        nonDomainCountBefore = cFirstIndexInOther + cTabs.length;
-      } else if (!isGAfterC && !didCrossBoundary) {
-        // User dropped G at/before its original position (before C) -> Keep G BEFORE C
-        nonDomainCountBefore = cFirstIndexInOther;
-      } else {
-        // General Threshold Rule based on middle tab of domain C
-        const dropOffsetInC = movedIndexInTarget - cFirstIndexInTarget;
-        const middleOffset = cTabs.length / 2;
+      // General Threshold Rule based on middle tab of domain C
+      const dropOffsetInC = movedIndexInTarget - cFirstIndexInTarget;
+      const middleOffset = cTabs.length / 2;
 
-        if (dropOffsetInC >= middleOffset) {
-          nonDomainCountBefore = cFirstIndexInOther + cTabs.length;
-        } else {
-          nonDomainCountBefore = cFirstIndexInOther;
-        }
+      if (dropOffsetInC >= middleOffset) {
+        nonDomainCountBefore = cFirstIndexInOther + cTabs.length;
+      } else {
+        nonDomainCountBefore = cFirstIndexInOther;
       }
     }
 

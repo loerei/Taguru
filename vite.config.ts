@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
-import fs from 'fs';
+import { resolve } from 'node:path';
+import fs from 'node:fs';
 
 function copyManifest() {
   return {

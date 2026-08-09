@@ -97,13 +97,14 @@ export const GroupItem: React.FC<GroupItemProps> = ({
               onKeyDown={handleKeyDown}
             />
           ) : (
-            <span
-              className="group-name"
+            <button
+              type="button"
+              className="group-name-btn"
               onClick={() => setIsEditing(true)}
               title="Click to rename"
             >
               {group.name}
-            </span>
+            </button>
           )}
           <span className="group-meta">
             {group.tabs.length} tabs • {formattedDate}

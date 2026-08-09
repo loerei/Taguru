@@ -77,8 +77,12 @@ export async function saveCurrentWindowAsGroup(customName?: string): Promise<Sav
   const dateStr = new Date(now).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const defaultName = customName?.trim() || `Group - ${dateStr} (${savedTabs.length} tabs)`;
 
+  const uniqueId = typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `group_${now}_${Math.floor(Math.random() * 1000000)}`;
+
   const newGroup: SavedGroup = {
-    id: `group_${now}_${Math.random().toString(36).substring(2, 7)}`,
+    id: uniqueId,
     name: defaultName,
     createdAt: now,
     tabs: savedTabs
@@ -324,12 +328,14 @@ export async function setDefaultClickBehavior(behavior: 'popup' | 'sidepanel'): 
   }
 }
 
+export type ViewTab = 'groups' | 'domains' | 'settings';
+
 const ACTIVE_VIEW_KEY = 'taguru_active_view';
 
-export async function getActiveView(): Promise<'groups' | 'domains' | 'settings'> {
+export async function getActiveView(): Promise<ViewTab> {
   if (typeof chrome === 'undefined' || !chrome.storage?.local) {
     const raw = localStorage.getItem(ACTIVE_VIEW_KEY);
-    return (raw as 'groups' | 'domains' | 'settings') || 'groups';
+    return (raw as ViewTab) || 'groups';
   }
   return new Promise((resolve) => {
     chrome.storage.local.get([ACTIVE_VIEW_KEY], (res) => {
@@ -343,7 +349,7 @@ export async function getActiveView(): Promise<'groups' | 'domains' | 'settings'
   });
 }
 
-export async function setActiveViewStorage(view: 'groups' | 'domains' | 'settings'): Promise<void> {
+export async function setActiveViewStorage(view: ViewTab): Promise<void> {
   if (typeof chrome === 'undefined' || !chrome.storage?.local) {
     localStorage.setItem(ACTIVE_VIEW_KEY, view);
     return;

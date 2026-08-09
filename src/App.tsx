@@ -188,6 +188,12 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
     showStatus(`Closed ${targetDomains.length} domains`);
   };
 
+  const getFooterLeftText = () => {
+    if (activeView === 'groups') return `${groups.length} saved groups`;
+    if (activeView === 'domains') return `${domains.length} active domains`;
+    return `Auto Sort: ${isAutoSort ? 'ON' : 'OFF'}`;
+  };
+
   return (
     <div className="app-container">
       <Header
@@ -233,13 +239,7 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
       </main>
 
       <footer className="footer">
-        <span>
-          {activeView === 'groups'
-            ? `${groups.length} saved groups`
-            : activeView === 'domains'
-            ? `${domains.length} active domains`
-            : `Auto Sort: ${isAutoSort ? 'ON' : 'OFF'}`}
-        </span>
+        <span>{getFooterLeftText()}</span>
         <span>
           {updateInfo?.hasUpdate ? (
             <a

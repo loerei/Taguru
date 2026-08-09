@@ -205,7 +205,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onManualOptionsChange,
   onAutoOptionsChange
 }) => {
-  const isReleaseMode = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'release';
+  const isReleaseMode = import.meta.env?.MODE === 'release';
   const [logStatus, setLogStatus] = useState<string | null>(null);
   const [clickBehavior, setClickBehavior] = useState<'popup' | 'sidepanel'>('popup');
 

@@ -10,7 +10,7 @@ function formatTimestamp(): string {
 }
 
 async function saveLogToBuffer(entry: string): Promise<void> {
-  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+  if (typeof chrome === 'undefined' || !chrome?.storage?.local) {
     return;
   }
   try {
@@ -27,7 +27,7 @@ async function saveLogToBuffer(entry: string): Promise<void> {
 }
 
 export async function devLog(message: string, ...args: any[]): Promise<void> {
-  if (typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'release') {
+  if (import.meta.env?.MODE === 'release') {
     return;
   }
 
@@ -52,10 +52,10 @@ export async function devLog(message: string, ...args: any[]): Promise<void> {
 }
 
 export async function logTabPositionsSnapshot(actionTag: string): Promise<void> {
-  if (typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'release') {
+  if (import.meta.env?.MODE === 'release') {
     return;
   }
-  if (typeof chrome === 'undefined' || !chrome.tabs) {
+  if (typeof chrome === 'undefined' || !chrome?.tabs) {
     return;
   }
 
@@ -115,7 +115,7 @@ export async function logTabPositionsSnapshot(actionTag: string): Promise<void> 
 }
 
 export async function getDebugLogs(): Promise<string[]> {
-  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+  if (typeof chrome === 'undefined' || !chrome?.storage?.local) {
     return [];
   }
   const result = await chrome.storage.local.get('debugLogs');
@@ -123,7 +123,7 @@ export async function getDebugLogs(): Promise<string[]> {
 }
 
 export async function clearDebugLogs(): Promise<void> {
-  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+  if (typeof chrome === 'undefined' || !chrome?.storage?.local) {
     return;
   }
   await chrome.storage.local.remove('debugLogs');
@@ -139,7 +139,7 @@ export async function exportDebugLogsAsFile(): Promise<void> {
   a.download = `taguru-debug-logs-${Date.now()}.txt`;
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
+  a.remove();
   URL.revokeObjectURL(url);
 }
 

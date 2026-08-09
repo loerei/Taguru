@@ -16,7 +16,7 @@ const CACHE_KEY = 'taguru_latest_release_cache';
 const CACHE_DURATION_MS = 6 * 60 * 60 * 1000; // 6 hours cache
 
 function parseSemver(ver: string): number[] {
-  return ver.replace(/^v/, '').split('.').map((n) => parseInt(n, 10) || 0);
+  return ver.replace(/^v/, '').split('.').map((n) => Number.parseInt(n, 10) || 0);
 }
 
 export function isNewerVersion(currentVersion: string, latestVersion: string): boolean {

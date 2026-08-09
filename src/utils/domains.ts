@@ -122,8 +122,12 @@ export async function saveDomainAsGroup(domains: string[]): Promise<SavedGroup |
   const domainStr = domains.length === 1 ? domains[0] : `${domains.length} domains`;
   const name = `Group - ${domainStr} (${targetTabs.length} tabs)`;
 
+  const uniqueId = typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `group_${now}_${Math.floor(Math.random() * 1000000)}`;
+
   const newGroup: SavedGroup = {
-    id: `group_${now}_${Math.random().toString(36).substring(2, 7)}`,
+    id: uniqueId,
     name,
     createdAt: now,
     tabs: targetTabs
