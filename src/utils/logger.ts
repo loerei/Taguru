@@ -35,7 +35,7 @@ export async function devLog(message: string, ...args: any[]): Promise<void> {
   const formattedArgs = args.length > 0 ? ' ' + args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ') : '';
   const logLine = `[${timestamp}] ${message}${formattedArgs}`;
 
-  if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
+  if (import.meta.env?.DEV) {
     console.log(`[Taguru DevLog] ${message}`, ...args);
   }
 
@@ -46,8 +46,8 @@ export async function devLog(message: string, ...args: any[]): Promise<void> {
       console.log(`[Taguru DevLog] ${message}`, ...args);
       await saveLogToBuffer(logLine);
     }
-  } catch (_e) {
-    // Silent fallback
+  } catch (err) {
+    if (err) void 0;
   }
 }
 
@@ -149,7 +149,8 @@ export async function copyDebugLogsToClipboard(): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(content);
     return true;
-  } catch (_e) {
+  } catch (err) {
+    if (err) void 0;
     return false;
   }
 }

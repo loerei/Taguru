@@ -13,9 +13,9 @@ import {
   getAutoSortEnabled,
   setAutoSortEnabled,
   getManualSortOptions,
-  setManualSortOptions,
+  setManualSortOptions as saveManualSortOptions,
   getAutoSortOptions,
-  setAutoSortOptions,
+  setAutoSortOptions as saveAutoSortOptions,
   getActiveView,
   setActiveViewStorage,
   DEFAULT_SORT_OPTIONS
@@ -40,8 +40,8 @@ interface AppProps {
 export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
   const [activeView, setActiveView] = useState<'groups' | 'domains' | 'settings'>('groups');
   const [isAutoSort, setIsAutoSort] = useState<boolean>(false);
-  const [manualSortOptions, setManualSortOptionsState] = useState<SortOptions>(DEFAULT_SORT_OPTIONS);
-  const [autoSortOptions, setAutoSortOptionsState] = useState<SortOptions>(DEFAULT_SORT_OPTIONS);
+  const [manualSortOptions, setManualSortOptions] = useState<SortOptions>(DEFAULT_SORT_OPTIONS);
+  const [autoSortOptions, setAutoSortOptions] = useState<SortOptions>(DEFAULT_SORT_OPTIONS);
   const [groups, setGroups] = useState<SavedGroup[]>([]);
   const [domains, setDomains] = useState<DomainGroup[]>([]);
   const [status, setStatus] = useState<string>('');
@@ -62,8 +62,8 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
     refreshGroups();
     refreshDomains();
     getAutoSortEnabled().then(setIsAutoSort);
-    getManualSortOptions().then(setManualSortOptionsState);
-    getAutoSortOptions().then(setAutoSortOptionsState);
+    getManualSortOptions().then(setManualSortOptions);
+    getAutoSortOptions().then(setAutoSortOptions);
     checkLatestRelease().then(setUpdateInfo);
   }, [refreshGroups, refreshDomains]);
 
@@ -107,14 +107,14 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
   };
 
   const handleManualOptionsChange = async (options: SortOptions) => {
-    setManualSortOptionsState(options);
-    await setManualSortOptions(options);
+    setManualSortOptions(options);
+    await saveManualSortOptions(options);
     showStatus('Sort Button options saved');
   };
 
   const handleAutoOptionsChange = async (options: SortOptions) => {
-    setAutoSortOptionsState(options);
-    await setAutoSortOptions(options);
+    setAutoSortOptions(options);
+    await saveAutoSortOptions(options);
     showStatus('Auto Sort options saved');
   };
 

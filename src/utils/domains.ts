@@ -161,7 +161,7 @@ export async function reorderDomainBlock(
     ? allTabs.find((t) => t.id === targetTabIds[0])
     : allTabs.find((t) => t.id === targetTabIds[targetTabIds.length - 1]);
 
-  if (!targetTabObj || targetTabObj.index === undefined) return;
+  if (!targetTabObj || targetTabObj?.index === undefined) return;
 
   let targetIndex = targetTabObj.index;
   if (place === 'after') {

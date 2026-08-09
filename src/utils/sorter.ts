@@ -8,7 +8,9 @@ export const DEFAULT_SORT_OPTIONS: SortOptions = {
   sortByQueryAndHash: false
 };
 
-function normalizeOptions(options?: SortOptions | 'domain' | 'full'): SortOptions {
+export type SortModeInput = SortOptions | 'domain' | 'full';
+
+function normalizeOptions(options?: SortModeInput): SortOptions {
   if (!options) {
     return DEFAULT_SORT_OPTIONS;
   }
@@ -134,7 +136,6 @@ export function parseURL(rawUrl: string): ParsedURL {
       rest = cleaned.substring(slashIndex);
     } else {
       domain = cleaned.toLowerCase();
-      rest = '';
     }
 
     let queryAndHash = '';
