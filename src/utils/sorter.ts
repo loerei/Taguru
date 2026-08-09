@@ -165,7 +165,7 @@ export function parseURL(rawUrl: string): ParsedURL {
 export function compareURLs(
   urlA: string,
   urlB: string,
-  options?: SortOptions | 'domain' | 'full'
+  options?: SortModeInput
 ): number {
   const opts = normalizeOptions(options);
   const parsedA = parseURL(urlA);
