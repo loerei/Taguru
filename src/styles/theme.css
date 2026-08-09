@@ -829,3 +829,16 @@ body.sidepanel-body {
   font-size: 11px;
   color: var(--text-muted);
 }
+
+.footer-update-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.footer-update-link:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+}

@@ -31,6 +31,7 @@ import { Header } from './components/Header';
 import { GroupList } from './components/GroupList';
 import { DomainList } from './components/DomainList';
 import { SettingsView } from './components/SettingsView';
+import { checkLatestRelease, UpdateCheckResult } from './utils/updateChecker';
 
 interface AppProps {
   isSidePanel?: boolean;
@@ -44,6 +45,7 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
   const [groups, setGroups] = useState<SavedGroup[]>([]);
   const [domains, setDomains] = useState<DomainGroup[]>([]);
   const [status, setStatus] = useState<string>('');
+  const [updateInfo, setUpdateInfo] = useState<UpdateCheckResult | null>(null);
 
   const refreshGroups = useCallback(async () => {
     const loaded = await getGroups();
@@ -62,6 +64,7 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
     getAutoSortEnabled().then(setIsAutoSort);
     getManualSortOptions().then(setManualSortOptionsState);
     getAutoSortOptions().then(setAutoSortOptionsState);
+    checkLatestRelease().then(setUpdateInfo);
   }, [refreshGroups, refreshDomains]);
 
   const handleViewChange = (view: 'groups' | 'domains' | 'settings') => {
@@ -237,7 +240,21 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
             ? `${domains.length} active domains`
             : `Auto Sort: ${isAutoSort ? 'ON' : 'OFF'}`}
         </span>
-        <span>{status}</span>
+        <span>
+          {updateInfo?.hasUpdate ? (
+            <a
+              href={updateInfo.releaseUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="footer-update-link"
+              title={`New version v${updateInfo.latestVersion} available on GitHub`}
+            >
+              Update v{updateInfo.latestVersion} ↗
+            </a>
+          ) : (
+            status
+          )}
+        </span>
       </footer>
     </div>
   );
