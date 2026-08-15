@@ -36,20 +36,25 @@ initDomainOrderCache();
 async function attemptSort(
   windowId?: number,
   options?: SortOptions,
-  retries = 3
+  actionTag = 'Manual Sort Button',
+  maxWaitMs = 10000
 ): Promise<number> {
-  try {
-    return await sortCurrentWindowTabs(windowId, options);
-  } catch (err: any) {
-    const isDragError =
-      err?.message?.includes('user may be dragging a tab') ||
-      (typeof err === 'string' && (err as string).includes('user may be dragging a tab'));
-    if (retries > 0 && isDragError) {
-      devLog(`User still dragging, retrying in 300ms... (${retries} retries left)`);
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return attemptSort(windowId, options, retries - 1);
+  const startTime = Date.now();
+  while (true) {
+    try {
+      return await sortCurrentWindowTabs(windowId, options, actionTag);
+    } catch (err: any) {
+      const isDragError =
+        err?.message?.includes('user may be dragging a tab') ||
+        (typeof err === 'string' && (err as string).includes('user may be dragging a tab'));
+      const elapsed = Date.now() - startTime;
+      if (isDragError && elapsed < maxWaitMs) {
+        devLog(`Tab is being dragged, awaiting drop (${Math.round((maxWaitMs - elapsed) / 1000)}s remaining)...`);
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        continue;
+      }
+      throw err;
     }
-    throw err;
   }
 }
 
@@ -57,20 +62,37 @@ async function attemptMoveDomainGroup(
   windowId: number | undefined,
   movedTabId: number,
   options?: SortOptions,
-  retries = 3
+  maxWaitMs = 10000
 ): Promise<number> {
-  try {
-    return await moveDomainGroupToTabPosition(windowId, movedTabId, options);
-  } catch (err: any) {
-    const isDragError =
-      err?.message?.includes('user may be dragging a tab') ||
-      (typeof err === 'string' && (err as string).includes('user may be dragging a tab'));
-    if (retries > 0 && isDragError) {
-      devLog(`User still dragging, retrying MBD in 300ms... (${retries} retries left)`);
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return attemptMoveDomainGroup(windowId, movedTabId, options, retries - 1);
+  const startTime = Date.now();
+  while (true) {
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+      try {
+        const tab = await chrome.tabs.get(movedTabId);
+        if (windowId !== undefined && tab.windowId !== windowId) {
+          devLog(`Tab ${movedTabId} moved to another window (${tab.windowId} != ${windowId}). Aborting MBD.`);
+          return 0;
+        }
+      } catch (_e) {
+        devLog(`Tab ${movedTabId} no longer exists (closed or torn off). Aborting MBD.`);
+        return 0;
+      }
     }
-    throw err;
+
+    try {
+      return await moveDomainGroupToTabPosition(windowId, movedTabId, options);
+    } catch (err: any) {
+      const isDragError =
+        err?.message?.includes('user may be dragging a tab') ||
+        (typeof err === 'string' && (err as string).includes('user may be dragging a tab'));
+      const elapsed = Date.now() - startTime;
+      if (isDragError && elapsed < maxWaitMs) {
+        devLog(`User still dragging tab ${movedTabId}, awaiting drop (${Math.round((maxWaitMs - elapsed) / 1000)}s remaining)...`);
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        continue;
+      }
+      throw err;
+    }
   }
 }
 
@@ -95,7 +117,8 @@ async function triggerAutoSort(windowId?: number, reason = 'unknown') {
     try {
       isSorting = true;
       devLog(`Triggering Auto Sort (reason: ${reason})`, options);
-      const count = await attemptSort(windowId, options);
+      const actionTag = `Auto Sort (${reason})`;
+      const count = await attemptSort(windowId, options, actionTag);
       devLog(`Sorted ${count} tabs.`);
     } catch (err) {
       console.error('[Taguru ServiceWorker] Sort error:', err);
@@ -150,7 +173,7 @@ if (typeof chrome !== 'undefined') {
                   await logTabPositionsSnapshot(`MBD Drag Complete (${count} moved)`);
                 } else {
                   devLog(`Triggering Auto Re-FSO for tab ${tabId}`);
-                  const count = await attemptSort(moveInfo.windowId, opts);
+                  const count = await attemptSort(moveInfo.windowId, opts, 'Auto Re-FSO');
                   devLog(`Re-FSO sorted ${count} tabs.`);
                 }
               } catch (err) {

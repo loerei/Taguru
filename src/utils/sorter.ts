@@ -283,7 +283,8 @@ export function updateDomainOrderCache(tabs: { id?: number; pendingUrl?: string;
 
 export async function sortCurrentWindowTabs(
   windowId?: number,
-  options?: SortOptions | 'domain' | 'full'
+  options?: SortOptions | 'domain' | 'full',
+  actionTag = 'Manual Sort Button'
 ): Promise<number> {
   if (typeof chrome === 'undefined' || !chrome.tabs) {
     return 0;
@@ -309,7 +310,7 @@ export async function sortCurrentWindowTabs(
   }
 
   updateDomainOrderCache(sortedTabs);
-  await logTabPositionsSnapshot('Manual Sort Button');
+  await logTabPositionsSnapshot(actionTag);
 
   return sortedTabs.length;
 }
@@ -339,6 +340,11 @@ export async function moveDomainGroupToTabPosition(
 
   const isMovedPinned = !!movedTab.pinned;
   const targetTabs = tabs.filter((t) => !!t.pinned === isMovedPinned);
+
+  // Warm up cache if empty (e.g. ServiceWorker cold start or recovery)
+  if (domainOrderCache.size === 0) {
+    updateDomainOrderCache(targetTabs);
+  }
 
   const movedDomain = parseURL(getTabUrl(movedTab)).domain;
   const domainTabs = targetTabs.filter(
@@ -467,32 +473,24 @@ export async function moveDomainGroupToTabPosition(
       }
     }
 
-    // Determine pre-drag relative domain positions from RAM Cache key insertion order
+    // Determine pre-drag relative domain positions and adjacency from RAM Cache key insertion order
     const cacheKeys = Array.from(domainOrderCache.keys());
     const gKeyIndex = cacheKeys.indexOf(movedDomain);
     const cKeyIndex = cacheKeys.indexOf(targetDomainC);
 
     let wasGAfterCInCache = false;
     let hasCache = false;
+    let isAdjacent = false;
 
     if (gKeyIndex !== -1 && cKeyIndex !== -1) {
       wasGAfterCInCache = gKeyIndex > cKeyIndex;
       hasCache = true;
+      // Pre-drag adjacency: domains are truly adjacent if and only if their index distance in cache is 1
+      isAdjacent = Math.abs(gKeyIndex - cKeyIndex) === 1;
     }
 
     const gFirstIndexInTarget = firstIndex;
     const isGAfterC = hasCache ? wasGAfterCInCache : gFirstIndexInTarget > cFirstIndexInTarget;
-
-    let otherDomainsBetweenCount = 0;
-    const rangeStart = Math.min(gFirstIndexInTarget, cFirstIndexInTarget);
-    const rangeEnd = Math.max(gFirstIndexInTarget, cFirstIndexInTarget);
-    for (let i = rangeStart; i < rangeEnd; i += 1) {
-      const d = parseURL(getTabUrl(targetTabs[i])).domain;
-      if (d !== movedDomain && d !== targetDomainC) {
-        otherDomainsBetweenCount += 1;
-      }
-    }
-    const isAdjacent = otherDomainsBetweenCount === 0;
 
     // Check if G actually crossed C's domain boundary during drag
     let didCrossBoundary = false;
@@ -510,14 +508,11 @@ export async function moveDomainGroupToTabPosition(
     } else if (isAdjacent && !isGAfterC && didCrossBoundary) {
       // G was adjacent BEFORE C and user dragged G DOWN into/across C -> Swap G AFTER C
       nonDomainCountBefore = cFirstIndexInOther + cTabs.length;
-    } else if (isGAfterC && !didCrossBoundary) {
-      // User dropped G at/after its original position (after C) -> Keep G AFTER C
-      nonDomainCountBefore = cFirstIndexInOther + cTabs.length;
-    } else if (!isGAfterC && !didCrossBoundary) {
-      // User dropped G at/before its original position (before C) -> Keep G BEFORE C
-      nonDomainCountBefore = cFirstIndexInOther;
+    } else if (isAdjacent && !didCrossBoundary) {
+      // User dropped G at/before its original position without crossing boundary -> Keep relative order
+      nonDomainCountBefore = isGAfterC ? cFirstIndexInOther + cTabs.length : cFirstIndexInOther;
     } else {
-      // General Threshold Rule based on middle tab of domain C
+      // Non-adjacent long-distance drag: General Threshold Rule based on middle tab of domain C
       const dropOffsetInC = movedIndexInTarget - cFirstIndexInTarget;
       const middleOffset = cTabs.length / 2;
 
