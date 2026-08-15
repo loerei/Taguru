@@ -5,6 +5,18 @@ All notable changes to the Taguru extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Click-to-Select & Contextual Header Action Bar in Domains View**: Streamlined multi-domain selection UX by removing the legacy batch mode toggle and checkboxes in favor of direct card click-to-select, and promoted the batch action controls (Move, Save, Delete, Select All, Clear) directly into the top Toolbar Header.
+
+### Fixed
+- **MBD Long-Distance Drag Lock Timeout (`0 moved`)**: Replaced the rigid 3-retry counter with a reactive Lock-State Polling mechanism that continuously awaits tabstrip unlock without hardcoded timeouts, eliminating `0 moved` failure drops when dragging tabs over long distances.
+- **MBD Pre-Drag Adjacency Calculation**: Fixed domain adjacency calculation to read true pre-drag domain distance directly from `domainOrderCache.keys()` (`Math.abs(gKeyIndex - cKeyIndex) === 1`), preventing non-adjacent long-distance drags from falsely triggering the adjacent-swap branch due to mutated tabstrip arrays.
+- **Tab Tear-off & Window Detach Guard**: Added active window existence checks (`chrome.tabs.get`) before moving tabs to gracefully abort MBD if a tab is torn off into a new window or closed mid-drag.
+- **ServiceWorker Cold-Start Cache Recovery**: Added automatic cache warm-up fallback in `moveDomainGroupToTabPosition` when `domainOrderCache` is empty upon ServiceWorker wake-up.
+- **Real-Time Snapshot Trigger Source Labels**: Fixed hardcoded `Manual Sort Button` snapshot log labels to accurately reflect event trigger origins (`Auto Sort (tab-updated)`, `Auto Sort (tab-created)`, `Auto Re-FSO`).
+
 ## [1.0.3] - 2026-08-08
 
 ### Added

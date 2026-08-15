@@ -21,7 +21,6 @@ export const DomainList: React.FC<DomainListProps> = ({
   onDelete
 }) => {
   const [sortOrder, setSortOrder] = useState<'alpha' | 'count'>('alpha');
-  const [isBatchMode, setIsBatchMode] = useState<boolean>(false);
   const [selectedDomains, setSelectedDomains] = useState<Set<string>>(new Set());
   const [draggedDomain, setDraggedDomain] = useState<string | null>(null);
   const [dragOverTarget, setDragOverTarget] = useState<{ domain: string; position: 'before' | 'after' } | null>(null);
@@ -124,50 +123,88 @@ export const DomainList: React.FC<DomainListProps> = ({
   return (
     <div className="domain-list-container">
       <div className="domain-toolbar">
-        <div className="toolbar-left">
-          <span className="meta-tag">{domains.length} domains</span>
-          {isBatchMode && (
-            <button type="button" className="btn-link" onClick={handleSelectAll}>
-              {selectedDomains.size === domains.length ? 'Deselect All' : 'Select All'}
-            </button>
-          )}
-        </div>
+        {selectedDomains.size === 0 ? (
+          <>
+            <div className="toolbar-left">
+              <span className="meta-tag">{domains.length} domains</span>
+            </div>
 
-        <div className="toolbar-actions">
-          <button
-            type="button"
-            className={`icon-btn ${sortOrder === 'count' ? 'active' : ''}`}
-            onClick={() => setSortOrder(sortOrder === 'alpha' ? 'count' : 'alpha')}
-            title={sortOrder === 'alpha' ? 'Sort by count' : 'Sort alphabetically'}
-          >
-            {sortOrder === 'alpha' ? (
-              <svg className="svg-icon" viewBox="0 0 24 24">
-                <path d="M15 6v12M15 18l4-4M15 6l4 4M4 7h7M4 12h5M4 17h3" />
-              </svg>
-            ) : (
-              <svg className="svg-icon" viewBox="0 0 24 24">
-                <path d="M4 6h16M4 12h10M4 18h6" />
-              </svg>
-            )}
-          </button>
+            <div className="toolbar-actions">
+              <button
+                type="button"
+                className={`icon-btn ${sortOrder === 'count' ? 'active' : ''}`}
+                onClick={() => setSortOrder(sortOrder === 'alpha' ? 'count' : 'alpha')}
+                title={sortOrder === 'alpha' ? 'Sort by count' : 'Sort alphabetically'}
+              >
+                {sortOrder === 'alpha' ? (
+                  <svg className="svg-icon" viewBox="0 0 24 24">
+                    <path d="M15 6v12M15 18l4-4M15 6l4 4M4 7h7M4 12h5M4 17h3" />
+                  </svg>
+                ) : (
+                  <svg className="svg-icon" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h10M4 18h6" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="toolbar-left">
+              <span className="meta-tag font-semibold">{selectedDomains.size} selected</span>
+              <button type="button" className="btn-link" onClick={handleSelectAll}>
+                {selectedDomains.size === domains.length ? 'Deselect All' : 'Select All'}
+              </button>
+            </div>
 
-          <button
-            type="button"
-            className={`icon-btn ${isBatchMode ? 'active' : ''}`}
-            onClick={() => {
-              setIsBatchMode(!isBatchMode);
-              if (isBatchMode) {
-                setSelectedDomains(new Set());
-              }
-            }}
-            title="Toggle batch selection mode"
-          >
-            <svg className="svg-icon" viewBox="0 0 24 24">
-              <polyline points="9 11 12 14 22 4" />
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-            </svg>
-          </button>
-        </div>
+            <div className="toolbar-actions">
+              <button
+                type="button"
+                className="btn btn-xs"
+                onClick={() => {
+                  onMoveToNewWindow(selectedList);
+                  setSelectedDomains(new Set());
+                }}
+                title="Move selected domains to new window"
+              >
+                Move
+              </button>
+              <button
+                type="button"
+                className="btn btn-xs btn-primary"
+                onClick={() => {
+                  onSaveAsGroup(selectedList);
+                  setSelectedDomains(new Set());
+                }}
+                title="Save selected domains as a group"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                className="btn btn-xs btn-danger"
+                onClick={() => {
+                  onDelete(selectedList);
+                  setSelectedDomains(new Set());
+                }}
+                title="Close selected domains tabs"
+              >
+                Delete
+              </button>
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => setSelectedDomains(new Set())}
+                title="Clear selection"
+              >
+                <svg className="svg-icon" viewBox="0 0 24 24">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="group-list">
@@ -175,7 +212,6 @@ export const DomainList: React.FC<DomainListProps> = ({
           <DomainItem
             key={item.domain}
             item={item}
-            isBatchMode={isBatchMode}
             isSelected={selectedDomains.has(item.domain)}
             isAutoSortFSO={isAutoSortFSO}
             closeDomainOnMiddleClick={closeDomainOnMiddleClick}
@@ -193,38 +229,6 @@ export const DomainList: React.FC<DomainListProps> = ({
           />
         ))}
       </div>
-
-      {isBatchMode && selectedDomains.size > 0 && (
-        <div className="batch-action-bar">
-          <span className="batch-count">{selectedDomains.size} selected</span>
-          <div className="batch-buttons">
-            <button
-              type="button"
-              className="btn btn-sm"
-              onClick={() => onMoveToNewWindow(selectedList)}
-              title="Move selected domains to new window"
-            >
-              Move
-            </button>
-            <button
-              type="button"
-              className="btn btn-sm btn-primary"
-              onClick={() => onSaveAsGroup(selectedList)}
-              title="Save selected domains as a group"
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              className="btn btn-sm btn-danger"
-              onClick={() => onDelete(selectedList)}
-              title="Close selected domains tabs"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

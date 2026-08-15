@@ -3,7 +3,6 @@ import { DomainGroup } from '../utils/domains';
 
 interface DomainItemProps {
   item: DomainGroup;
-  isBatchMode: boolean;
   isSelected: boolean;
   isAutoSortFSO?: boolean;
   closeDomainOnMiddleClick?: boolean;
@@ -22,7 +21,6 @@ interface DomainItemProps {
 
 export const DomainItem: React.FC<DomainItemProps> = ({
   item,
-  isBatchMode,
   isSelected,
   isAutoSortFSO = false,
   closeDomainOnMiddleClick = false,
@@ -72,7 +70,8 @@ export const DomainItem: React.FC<DomainItemProps> = ({
       } ${dragOverPosition === 'before' ? 'drag-over-top' : ''} ${
         dragOverPosition === 'after' ? 'drag-over-bottom' : ''
       }`}
-      draggable={isAutoSortFSO && !isBatchMode}
+      draggable={isAutoSortFSO}
+      onClick={() => onToggleSelect(item.domain)}
       onMouseDown={handleMouseDown}
       onAuxClick={handleAuxClick}
       onDragStart={(e) => onDragStart?.(e, item.domain)}
@@ -82,14 +81,6 @@ export const DomainItem: React.FC<DomainItemProps> = ({
       onDragEnd={onDragEnd}
     >
       <div className="group-left">
-        {isBatchMode && (
-          <input
-            type="checkbox"
-            className="domain-checkbox"
-            checked={isSelected}
-            onChange={() => onToggleSelect(item.domain)}
-          />
-        )}
         <div className="domain-favicon-container">
           {firstFavIcon && !imgError ? (
             <img
@@ -116,7 +107,10 @@ export const DomainItem: React.FC<DomainItemProps> = ({
         <button
           type="button"
           className="icon-btn"
-          onClick={() => onMoveToNewWindow(item.domain)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onMoveToNewWindow(item.domain);
+          }}
           title="Move domain tabs to new window"
         >
           <svg className="svg-icon" viewBox="0 0 24 24">
@@ -129,7 +123,10 @@ export const DomainItem: React.FC<DomainItemProps> = ({
         <button
           type="button"
           className="icon-btn"
-          onClick={() => onSaveAsGroup(item.domain)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSaveAsGroup(item.domain);
+          }}
           title="Save domain tabs as a group"
         >
           <svg className="svg-icon" viewBox="0 0 24 24">
@@ -142,7 +139,10 @@ export const DomainItem: React.FC<DomainItemProps> = ({
         <button
           type="button"
           className="icon-btn icon-btn-danger"
-          onClick={triggerDelete}
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerDelete();
+          }}
           title="Close domain tabs"
         >
           <svg className="svg-icon" viewBox="0 0 24 24">
