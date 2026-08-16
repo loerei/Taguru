@@ -25,7 +25,8 @@ import {
   getDomainsInCurrentWindow,
   closeDomainTabs,
   moveDomainTabsToNewWindow,
-  saveDomainAsGroup
+  saveDomainAsGroup,
+  addDomainsToExistingGroup
 } from './utils/domains';
 import { Header } from './components/Header';
 import { GroupList } from './components/GroupList';
@@ -182,6 +183,14 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
     }
   };
 
+  const handleDomainAddToGroup = async (groupId: string, targetDomains: string[]) => {
+    const updated = await addDomainsToExistingGroup(groupId, targetDomains);
+    if (updated) {
+      await refreshGroups();
+      showStatus(`Added to ${updated.name}`);
+    }
+  };
+
   const handleDomainDelete = async (targetDomains: string[]) => {
     await closeDomainTabs(targetDomains);
     await refreshDomains();
@@ -221,10 +230,12 @@ export const App: React.FC<AppProps> = ({ isSidePanel = false }) => {
         {activeView === 'domains' && (
           <DomainList
             domains={domains}
+            groups={groups}
             isAutoSortFSO={isAutoSort && autoSortOptions.groupByDomain && !autoSortOptions.sortByCharRank}
             closeDomainOnMiddleClick={manualSortOptions.closeDomainOnMiddleClick}
             onMoveToNewWindow={handleDomainMoveToNewWindow}
             onSaveAsGroup={handleDomainSaveAsGroup}
+            onAddToGroup={handleDomainAddToGroup}
             onDelete={handleDomainDelete}
           />
         )}

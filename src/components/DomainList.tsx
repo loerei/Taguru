@@ -1,27 +1,34 @@
 import React, { useState } from 'react';
 import { DomainGroup, reorderDomainBlock } from '../utils/domains';
+import { SavedGroup } from '../types';
 import { DomainItem } from './DomainItem';
+import { SaveGroupPopover } from './SaveGroupPopover';
 import { compareCustomStrings } from '../utils/sorter';
 
 interface DomainListProps {
   domains: DomainGroup[];
+  groups?: SavedGroup[];
   isAutoSortFSO?: boolean;
   closeDomainOnMiddleClick?: boolean;
   onMoveToNewWindow: (domains: string[]) => void;
   onSaveAsGroup: (domains: string[]) => void;
+  onAddToGroup?: (groupId: string, domains: string[]) => void;
   onDelete: (domains: string[]) => void;
 }
 
 export const DomainList: React.FC<DomainListProps> = ({
   domains,
+  groups = [],
   isAutoSortFSO = false,
   closeDomainOnMiddleClick = false,
   onMoveToNewWindow,
   onSaveAsGroup,
+  onAddToGroup,
   onDelete
 }) => {
   const [sortOrder, setSortOrder] = useState<'alpha' | 'count'>('alpha');
   const [selectedDomains, setSelectedDomains] = useState<Set<string>>(new Set());
+  const [showToolbarSavePopover, setShowToolbarSavePopover] = useState<boolean>(false);
   const [draggedDomain, setDraggedDomain] = useState<string | null>(null);
   const [dragOverTarget, setDragOverTarget] = useState<{ domain: string; position: 'before' | 'after' } | null>(null);
 
@@ -169,17 +176,39 @@ export const DomainList: React.FC<DomainListProps> = ({
               >
                 Move
               </button>
-              <button
-                type="button"
-                className="btn btn-xs btn-primary"
-                onClick={() => {
-                  onSaveAsGroup(selectedList);
-                  setSelectedDomains(new Set());
-                }}
-                title="Save selected domains as a group"
-              >
-                Save
-              </button>
+              <div className="save-group-popover-container">
+                <button
+                  type="button"
+                  className="btn btn-xs btn-primary"
+                  onClick={() => {
+                    if (groups.length === 0) {
+                      onSaveAsGroup(selectedList);
+                      setSelectedDomains(new Set());
+                    } else {
+                      setShowToolbarSavePopover(!showToolbarSavePopover);
+                    }
+                  }}
+                  title="Save selected domains as a group"
+                >
+                  Save
+                </button>
+                {showToolbarSavePopover && (
+                  <SaveGroupPopover
+                    groups={groups}
+                    onSaveAsNew={() => {
+                      onSaveAsGroup(selectedList);
+                      setSelectedDomains(new Set());
+                      setShowToolbarSavePopover(false);
+                    }}
+                    onAddToGroup={(groupId) => {
+                      onAddToGroup?.(groupId, selectedList);
+                      setSelectedDomains(new Set());
+                      setShowToolbarSavePopover(false);
+                    }}
+                    onClose={() => setShowToolbarSavePopover(false)}
+                  />
+                )}
+              </div>
               <button
                 type="button"
                 className="btn btn-xs btn-danger"
@@ -194,7 +223,10 @@ export const DomainList: React.FC<DomainListProps> = ({
               <button
                 type="button"
                 className="icon-btn"
-                onClick={() => setSelectedDomains(new Set())}
+                onClick={() => {
+                  setSelectedDomains(new Set());
+                  setShowToolbarSavePopover(false);
+                }}
                 title="Clear selection"
               >
                 <svg className="svg-icon" viewBox="0 0 24 24">
@@ -212,12 +244,14 @@ export const DomainList: React.FC<DomainListProps> = ({
           <DomainItem
             key={item.domain}
             item={item}
+            groups={groups}
             isSelected={selectedDomains.has(item.domain)}
             isAutoSortFSO={isAutoSortFSO}
             closeDomainOnMiddleClick={closeDomainOnMiddleClick}
             onToggleSelect={handleToggleSelect}
             onMoveToNewWindow={(d) => onMoveToNewWindow([d])}
             onSaveAsGroup={(d) => onSaveAsGroup([d])}
+            onAddToGroup={(groupId, d) => onAddToGroup?.(groupId, [d])}
             onDelete={(d) => onDelete([d])}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}

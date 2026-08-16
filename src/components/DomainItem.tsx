@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import { DomainGroup } from '../utils/domains';
+import { SavedGroup } from '../types';
+import { SaveGroupPopover } from './SaveGroupPopover';
 
 interface DomainItemProps {
   item: DomainGroup;
   isSelected: boolean;
+  groups?: SavedGroup[];
   isAutoSortFSO?: boolean;
   closeDomainOnMiddleClick?: boolean;
   onToggleSelect: (domain: string) => void;
   onMoveToNewWindow: (domain: string) => void;
   onSaveAsGroup: (domain: string) => void;
+  onAddToGroup?: (groupId: string, domain: string) => void;
   onDelete: (domain: string) => void;
   onDragStart?: (e: React.DragEvent, domain: string) => void;
   onDragOver?: (e: React.DragEvent, domain: string) => void;
@@ -22,11 +26,13 @@ interface DomainItemProps {
 export const DomainItem: React.FC<DomainItemProps> = ({
   item,
   isSelected,
+  groups = [],
   isAutoSortFSO = false,
   closeDomainOnMiddleClick = false,
   onToggleSelect,
   onMoveToNewWindow,
   onSaveAsGroup,
+  onAddToGroup,
   onDelete,
   onDragStart,
   onDragOver,
@@ -38,6 +44,7 @@ export const DomainItem: React.FC<DomainItemProps> = ({
 }) => {
   const [imgError, setImgError] = useState<boolean>(false);
   const [isExiting, setIsExiting] = useState<boolean>(false);
+  const [showSavePopover, setShowSavePopover] = useState<boolean>(false);
   const firstFavIcon = item.tabs.find((t) => !!t.favIconUrl)?.favIconUrl;
 
   const triggerDelete = () => {
@@ -120,21 +127,35 @@ export const DomainItem: React.FC<DomainItemProps> = ({
           </svg>
         </button>
 
-        <button
-          type="button"
-          className="icon-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSaveAsGroup(item.domain);
-          }}
-          title="Save domain tabs as a group"
-        >
-          <svg className="svg-icon" viewBox="0 0 24 24">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-            <polyline points="17 21 17 13 7 13 7 21" />
-            <polyline points="7 3 7 8 15 8" />
-          </svg>
-        </button>
+        <div className="save-group-popover-container">
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (groups.length === 0) {
+                onSaveAsGroup(item.domain);
+              } else {
+                setShowSavePopover(!showSavePopover);
+              }
+            }}
+            title="Save domain tabs as a group"
+          >
+            <svg className="svg-icon" viewBox="0 0 24 24">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+          </button>
+          {showSavePopover && (
+            <SaveGroupPopover
+              groups={groups}
+              onSaveAsNew={() => onSaveAsGroup(item.domain)}
+              onAddToGroup={(groupId) => onAddToGroup?.(groupId, item.domain)}
+              onClose={() => setShowSavePopover(false)}
+            />
+          )}
+        </div>
 
         <button
           type="button"

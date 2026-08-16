@@ -138,6 +138,43 @@ export async function saveDomainAsGroup(domains: string[]): Promise<SavedGroup |
   return newGroup;
 }
 
+export async function addDomainsToExistingGroup(groupId: string, domains: string[]): Promise<SavedGroup | null> {
+  const allDomains = new Set(domains);
+  const currentDomains = await getDomainsInCurrentWindow();
+  const newTabs: SavedTab[] = [];
+
+  for (const d of currentDomains) {
+    if (allDomains.has(d.domain)) {
+      newTabs.push(...d.tabs);
+    }
+  }
+
+  if (newTabs.length === 0) {
+    return null;
+  }
+
+  const currentGroups = await getGroups();
+  const targetGroupIndex = currentGroups.findIndex((g) => g.id === groupId);
+  if (targetGroupIndex === -1) {
+    return null;
+  }
+
+  const targetGroup = currentGroups[targetGroupIndex];
+  const existingUrls = new Set(targetGroup.tabs.map((t) => t.url));
+  const uniqueNewTabs = newTabs.filter((t) => !existingUrls.has(t.url));
+
+  const updatedGroup: SavedGroup = {
+    ...targetGroup,
+    tabs: [...targetGroup.tabs, ...uniqueNewTabs]
+  };
+
+  const updatedGroups = [...currentGroups];
+  updatedGroups[targetGroupIndex] = updatedGroup;
+  await saveGroups(updatedGroups);
+
+  return updatedGroup;
+}
+
 export async function reorderDomainBlock(
   draggedDomain: DomainGroup,
   targetDomain: DomainGroup,
